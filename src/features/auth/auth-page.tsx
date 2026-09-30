@@ -70,6 +70,18 @@ export function AuthPage() {
     let active = true;
     const supabase = createSupabaseBrowserClient();
 
+    async function prepareSignedInUser(user: User, successMessage?: string) {
+      if (!active) return;
+      setUserEmail(user.email ?? null);
+
+      try {
+        await ensureUserWorkspace(user);
+        if (active && successMessage) setAuthMessage(successMessage);
+      } catch {
+        if (active) setAuthMessage(pick(locale, "تم الدخول، لكن تعذر تجهيز ملفك.", "Signed in, but workspace setup failed."));
+      }
+    }
+
     async function syncAuthSession() {
       const currentUrl = new URL(window.location.href);
       const authCode = currentUrl.searchParams.get("code");
@@ -84,26 +96,25 @@ export function AuthPage() {
       try {
         if (authCode) {
           setAuthBusy(true);
-          const { data, error } = await supabase.auth.exchangeCodeForSession(authCode);
-          if (error) throw error;
-          const currentUser = data.session?.user ?? null;
+          const exchangeResult = await supabase.auth.exchangeCodeForSession(authCode);
+          const sessionResult = exchangeResult.data.session ? exchangeResult : await supabase.auth.getSession();
+          const currentUser = sessionResult.data.session?.user ?? null;
+
+          if (!currentUser) throw exchangeResult.error ?? new Error("OAuth session was not created.");
           if (!active) return;
-          setUserEmail(currentUser?.email ?? null);
-          if (currentUser) {
-            await ensureUserWorkspace(currentUser);
-            setAuthMessage(pick(locale, "تم تسجيل الدخول عبر Google.", "Google sign-in completed."));
-          }
+
+          await prepareSignedInUser(currentUser, pick(locale, "تم تسجيل الدخول عبر Google.", "Google sign-in completed."));
           window.history.replaceState({}, "", "/auth");
           return;
         }
 
-        const { data } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
         if (!active) return;
         const currentUser = data.session?.user ?? null;
-        setUserEmail(currentUser?.email ?? null);
-        if (currentUser) await ensureUserWorkspace(currentUser);
+        if (currentUser) await prepareSignedInUser(currentUser);
       } catch {
-        if (active) setAuthMessage(pick(locale, "تعذر قراءة جلسة الدخول.", "Could not read the auth session."));
+        if (active) setAuthMessage(pick(locale, "تعذر إكمال جلسة الدخول. جرّب Google مرة أخرى.", "Could not complete the auth session. Try Google again."));
       } finally {
         if (active) setAuthBusy(false);
       }
@@ -113,12 +124,14 @@ export function AuthPage() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const currentUser = session?.user ?? null;
-      setUserEmail(currentUser?.email ?? null);
-      if (!currentUser) setAssessmentDraftId(null);
-      if (currentUser) {
-        setAuthBusy(false);
-        ensureUserWorkspace(currentUser).catch(() => setAuthMessage(pick(locale, "تم الدخول، لكن تعذر تجهيز ملفك.", "Signed in, but workspace setup failed.")));
+      if (!currentUser) {
+        setUserEmail(null);
+        setAssessmentDraftId(null);
+        return;
       }
+
+      setAuthBusy(false);
+      prepareSignedInUser(currentUser).catch(() => undefined);
     });
 
     return () => {
@@ -215,6 +228,7 @@ export function AuthPage() {
     </main>
   );
 }
+
 
 
 
