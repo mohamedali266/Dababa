@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -20,6 +20,7 @@ import {
   Sun,
   TimerReset,
   Trophy,
+  LogOut,
   Waves
 } from "lucide-react";
 import { GlassCard, IconButton, ProgressRing, SemiGauge, Toggle } from "@/components/ui/primitives";
@@ -35,8 +36,11 @@ import {
   workoutExercises
 } from "@/features/dashboard/mock-data";
 import { copy, type Locale } from "@/lib/translations";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import type { User } from "@supabase/supabase-js";
 
 type ThemeChoice = "dark" | "light" | "system";
+type AuthMode = "signin" | "signup";
 type Tab = "home" | "workout" | "tracking" | "nutrition" | "hydration" | "supplements" | "progress" | "settings" | "admin";
 
 const tabs: { id: Tab; icon: typeof Home }[] = [
@@ -77,6 +81,14 @@ export function DababaShell() {
   const [running, setRunning] = useState(false);
   const [checkedSupplements, setCheckedSupplements] = useState<boolean[]>(supplements.map((item) => item.done));
   const [reminderStates, setReminderStates] = useState<boolean[]>(reminders.map((item) => item.enabled));
+  const [authMode, setAuthMode] = useState<AuthMode>("signup");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [assessmentDraftId, setAssessmentDraftId] = useState<string | null>(null);
+  const [authMessage, setAuthMessage] = useState<string | null>(null);
+  const [authBusy, setAuthBusy] = useState(false);
   const t = copy[locale];
   const isRtl = locale === "ar";
 
@@ -110,6 +122,157 @@ export function DababaShell() {
     }
   }, []);
 
+  const ensureUserWorkspace = useCallback(async (user: User) => {
+    const supabase = createSupabaseBrowserClient();
+    const fallbackName = user.email?.split("@")[0] || "Dababa athlete";
+    const safeName = displayName.trim() || fallbackName;
+
+    const profileResult = await supabase.from("profiles").upsert(
+      {
+        id: user.id,
+        display_name: safeName,
+        locale,
+        unit_system: "metric",
+        theme
+      },
+      { onConflict: "id" }
+    );
+
+    if (profileResult.error) throw profileResult.error;
+
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Africa/Cairo";
+    const prefsResult = await supabase.from("notification_prefs").upsert(
+      {
+        user_id: user.id,
+        timezone
+      },
+      { onConflict: "user_id" }
+    );
+
+    if (prefsResult.error) throw prefsResult.error;
+
+    const existingDraft = await supabase
+      .from("health_assessments")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("status", "draft")
+      .maybeSingle();
+
+    if (existingDraft.error) throw existingDraft.error;
+
+    if (existingDraft.data?.id) {
+      setAssessmentDraftId(existingDraft.data.id);
+      return;
+    }
+
+    const draftResult = await supabase
+      .from("health_assessments")
+      .insert({
+        user_id: user.id,
+        status: "draft",
+        answers: {
+          source: "onboarding_welcome",
+          locale,
+          preferred_goal: "lean_gain"
+        }
+      })
+      .select("id")
+      .single();
+
+    if (draftResult.error) throw draftResult.error;
+    setAssessmentDraftId(draftResult.data.id);
+  }, [displayName, locale, theme]);
+
+  useEffect(() => {
+    let active = true;
+    const supabase = createSupabaseBrowserClient();
+
+    supabase.auth
+      .getSession()
+      .then(async ({ data }) => {
+        if (!active) return;
+        const currentUser = data.session?.user ?? null;
+        setUserEmail(currentUser?.email ?? null);
+        if (currentUser) await ensureUserWorkspace(currentUser);
+      })
+      .catch(() => {
+        if (active) setAuthMessage(pick(locale, "تعذر قراءة جلسة الدخول.", "Could not read the auth session."));
+      });
+
+    const {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      const currentUser = session?.user ?? null;
+      setUserEmail(currentUser?.email ?? null);
+      if (!currentUser) setAssessmentDraftId(null);
+      if (currentUser) {
+        ensureUserWorkspace(currentUser).catch(() => {
+          setAuthMessage(pick(locale, "تم الدخول، لكن تعذر تجهيز ملفك.", "Signed in, but workspace setup failed."));
+        });
+      }
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, [ensureUserWorkspace, locale]);
+
+  async function handleAuthSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setAuthBusy(true);
+    setAuthMessage(null);
+
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const email = authEmail.trim().toLowerCase();
+      const password = authPassword;
+
+      const result = authMode === "signup"
+        ? await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: {
+                display_name: displayName.trim() || email.split("@")[0]
+              }
+            }
+          })
+        : await supabase.auth.signInWithPassword({ email, password });
+
+      if (result.error) throw result.error;
+
+      if (result.data.session?.user) {
+        await ensureUserWorkspace(result.data.session.user);
+        setUserEmail(result.data.session.user.email ?? email);
+        setAuthMessage(pick(locale, "تم تجهيز حسابك وبدء تقييمك.", "Your account is ready and assessment is started."));
+      } else {
+        setAuthMessage(pick(locale, "راجع بريدك لتأكيد الحساب ثم سجل الدخول.", "Check your email to confirm the account, then sign in."));
+      }
+    } catch {
+      setAuthMessage(pick(locale, "تعذر إتمام العملية. تأكد من البريد وكلمة المرور.", "Could not complete the request. Check email and password."));
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+
+  async function handleSignOut() {
+    setAuthBusy(true);
+    setAuthMessage(null);
+
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      setUserEmail(null);
+      setAssessmentDraftId(null);
+      setAuthMessage(pick(locale, "تم تسجيل الخروج.", "Signed out."));
+    } catch {
+      setAuthMessage(pick(locale, "تعذر تسجيل الخروج الآن.", "Could not sign out right now."));
+    } finally {
+      setAuthBusy(false);
+    }
+  }
   const themeIcon = theme === "dark" ? Moon : theme === "light" ? Sun : Waves;
   const ThemeIcon = themeIcon;
   const visibleTabs = tabs;
@@ -169,16 +332,57 @@ export function DababaShell() {
                 <span>{t.start}</span>
                 <b><ArrowIcon size={18} /></b>
               </button>
-              <button className="secondary-cta" onClick={() => setActiveTab("settings")} type="button">{t.login}</button>
+              <button className="secondary-cta" onClick={() => setAuthMode("signin")} type="button">{t.login}</button>
             </div>
           </div>
-          <GlassCard className="onboarding-sheet">
+          <GlassCard className="onboarding-sheet auth-sheet">
             <div className="sheet-handle" />
-            <p>{locale === "ar" ? "تقييم سريع" : "Quick assessment"}</p>
-            <strong>{locale === "ar" ? "4 أيام تدريب / هدف تضخيم نظيف / معدات جيم كاملة" : "4 training days / lean gain / full gym access"}</strong>
-            <button onClick={() => setActiveTab("progress")} type="button">
-              {locale === "ar" ? "راجع الخطة" : "Review plan"} <ChevronUp size={17} />
-            </button>
+            {userEmail ? (
+              <div className="auth-summary">
+                <p>{pick(locale, "الحساب متصل", "Account connected")}</p>
+                <strong>{userEmail}</strong>
+                <span>{assessmentDraftId ? pick(locale, "مسودة التقييم جاهزة", "Assessment draft ready") : pick(locale, "نجهز تقييمك الآن", "Preparing your assessment")}</span>
+                <div className="auth-actions">
+                  <button onClick={() => setActiveTab("progress")} type="button">
+                    {pick(locale, "راجع الخطة", "Review plan")} <ChevronUp size={17} />
+                  </button>
+                  <button onClick={handleSignOut} type="button" disabled={authBusy}>
+                    <LogOut size={16} /> {pick(locale, "خروج", "Sign out")}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form className="auth-form" onSubmit={handleAuthSubmit}>
+                <p>{authMode === "signup" ? pick(locale, "ابدأ حسابك", "Start your account") : pick(locale, "ادخل لحسابك", "Sign in")}</p>
+                <strong>{pick(locale, "احفظ تقييمك وخطتك على Supabase", "Save your assessment and plan on Supabase")}</strong>
+                <div className="auth-mode" role="group" aria-label={pick(locale, "اختيار الدخول", "Auth mode")}> 
+                  <button className={authMode === "signup" ? "active" : ""} onClick={() => setAuthMode("signup")} type="button">
+                    {pick(locale, "تسجيل جديد", "Sign up")}
+                  </button>
+                  <button className={authMode === "signin" ? "active" : ""} onClick={() => setAuthMode("signin")} type="button">
+                    {pick(locale, "دخول", "Sign in")}
+                  </button>
+                </div>
+                {authMode === "signup" ? (
+                  <label>
+                    <span>{pick(locale, "الاسم", "Name")}</span>
+                    <input autoComplete="name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder={pick(locale, "اسمك", "Your name")} />
+                  </label>
+                ) : null}
+                <label>
+                  <span>{pick(locale, "البريد", "Email")}</span>
+                  <input autoComplete="email" inputMode="email" required type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="you@example.com" />
+                </label>
+                <label>
+                  <span>{pick(locale, "كلمة المرور", "Password")}</span>
+                  <input autoComplete={authMode === "signup" ? "new-password" : "current-password"} minLength={6} required type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="••••••••" />
+                </label>
+                <button className="auth-submit" disabled={authBusy} type="submit">
+                  {authBusy ? pick(locale, "جار التنفيذ", "Working") : authMode === "signup" ? pick(locale, "إنشاء الحساب", "Create account") : pick(locale, "تسجيل الدخول", "Sign in")}
+                </button>
+                {authMessage ? <span className="auth-message">{authMessage}</span> : null}
+              </form>
+            )}
           </GlassCard>
         </section>
 
@@ -389,3 +593,13 @@ export function DababaShell() {
     </main>
   );
 }
+
+
+
+
+
+
+
+
+
+
