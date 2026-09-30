@@ -1095,3 +1095,545 @@ input:focus-visible {
   color: var(--text-primary);
   background: var(--glass-fill);
 }
+
+/* Route split redesign */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.dashboard-shell .app-frame {
+  padding-block-start: 18px;
+}
+
+.dashboard-hero {
+  display: grid;
+  gap: 18px;
+  padding-block: 28px 18px;
+}
+
+.dashboard-hero .welcome-copy h2,
+.auth-poster h1,
+.admin-header h1,
+.auth-form h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: clamp(2rem, 7vw, 4.4rem);
+  line-height: 1.05;
+}
+
+.hero-focus-panel {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 18px;
+  padding: 20px;
+}
+
+.hero-focus-panel > span {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.hero-focus-panel > strong {
+  font-size: clamp(1.25rem, 3vw, 2rem);
+  line-height: 1.15;
+}
+
+.hero-focus-panel > p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.hero-focus-panel .progress-ring {
+  grid-row: 1 / span 3;
+  grid-column: 2;
+}
+
+.desktop-tabs {
+  display: none;
+}
+
+.user-chip,
+.auth-link,
+.rail-link,
+.brand-row,
+.google-button,
+.back-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+.user-chip,
+.auth-link {
+  min-height: 46px;
+  gap: 8px;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  padding-inline: 12px;
+  color: var(--text-primary);
+  background: color-mix(in oklab, var(--glass-fill-strong) 76%, transparent);
+  backdrop-filter: blur(16px) saturate(140%);
+  font-size: 0.84rem;
+  font-weight: 900;
+}
+
+.user-chip span {
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-chip button {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: var(--text-primary);
+  background: var(--glass-fill);
+}
+
+.rail-link {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  justify-content: center;
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  color: var(--text-muted);
+  background: var(--glass-fill);
+}
+
+.rail-link span {
+  position: absolute;
+  inset-inline-start: calc(100% + 10px);
+  top: 50%;
+  display: none;
+  translate: 0 -50%;
+  white-space: nowrap;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: var(--text-primary);
+  background: var(--glass-fill-strong);
+}
+
+.rail-link:hover span,
+.rail-link:focus-visible span {
+  display: block;
+}
+
+.auth-route {
+  min-height: 100dvh;
+  padding: 16px;
+}
+
+.auth-layout {
+  display: grid;
+  width: min(100%, 1180px);
+  min-height: calc(100dvh - 32px);
+  margin-inline: auto;
+  gap: 18px;
+}
+
+.auth-poster,
+.auth-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  border-radius: 32px;
+}
+
+.auth-poster {
+  display: grid;
+  align-content: space-between;
+  min-height: 360px;
+  padding: 20px;
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--bg-deep) 20%, transparent), color-mix(in oklab, var(--bg-deep) 76%, transparent)),
+    url('/images/athletic-backdrop.png') center / cover;
+  box-shadow: var(--shadow-glass);
+}
+
+.auth-poster::after {
+  position: absolute;
+  inset: auto 8% 8% auto;
+  width: 220px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  content: "";
+  background: color-mix(in oklab, var(--brand-blue-glow) 26%, transparent);
+  filter: blur(48px);
+}
+
+.auth-poster > * {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-poster > .icon-button {
+  position: absolute;
+  inset-block-start: 20px;
+  inset-inline-end: 20px;
+}
+
+.brand-row {
+  gap: 10px;
+  width: fit-content;
+  font-weight: 950;
+}
+
+.brand-row .brand-mark {
+  margin: 0;
+}
+
+.auth-poster .welcome-copy p,
+.admin-header p {
+  max-width: 58ch;
+  color: var(--text-secondary);
+}
+
+.auth-panel {
+  align-self: stretch;
+  padding: 18px;
+}
+
+.auth-form h2 {
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+}
+
+.google-button,
+.back-link {
+  justify-content: center;
+  gap: 9px;
+  min-height: 46px;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  color: var(--text-primary);
+  background: color-mix(in oklab, var(--glass-fill-strong) 74%, transparent);
+  font-weight: 900;
+}
+
+.google-button span {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--cta-text);
+  background: var(--cta-bg);
+  font-family: var(--font-latin);
+}
+
+.spin {
+  animation: spin 850ms linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.admin-route {
+  min-height: 100dvh;
+}
+
+.admin-frame {
+  display: grid;
+  width: min(100%, 1480px);
+  margin-inline: auto;
+  padding: 14px;
+  gap: 14px;
+}
+
+.admin-sidebar,
+.admin-header,
+.admin-kpi,
+.admin-table-card,
+.ops-panel {
+  border: 1px solid var(--glass-border);
+  background: color-mix(in oklab, var(--glass-fill-strong) 76%, transparent);
+  box-shadow: var(--shadow-glass);
+  backdrop-filter: blur(20px) saturate(150%);
+}
+
+.admin-sidebar {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  border-radius: 28px;
+  padding: 14px;
+}
+
+.admin-sidebar nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.admin-sidebar button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: start;
+  gap: 9px;
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  color: var(--text-secondary);
+  background: var(--glass-fill);
+  font-weight: 900;
+}
+
+.admin-sidebar button.active {
+  color: var(--text-primary);
+  background: color-mix(in oklab, var(--brand-blue) 34%, var(--glass-fill));
+}
+
+.admin-main {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 18px;
+  border-radius: 28px;
+  padding: 18px;
+}
+
+.live-badge.warning i {
+  background: var(--warning);
+  box-shadow: 0 0 16px var(--warning);
+}
+
+.admin-kpis,
+.admin-workspace {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-kpis {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-kpi {
+  display: grid;
+  min-height: 132px;
+  align-content: space-between;
+  border-radius: 24px;
+  padding: 16px;
+}
+
+.admin-kpi svg,
+.ops-panel svg {
+  color: var(--brand-blue-glow);
+}
+
+.admin-kpi span,
+.ops-panel p,
+.audit-panel span {
+  color: var(--text-secondary);
+}
+
+.admin-kpi strong {
+  font-size: clamp(1.6rem, 4vw, 2.8rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-workspace {
+  grid-template-columns: 1fr;
+}
+
+.admin-table-card,
+.ops-panel {
+  border-radius: 24px;
+  padding: 16px;
+}
+
+.responsive-table {
+  overflow-x: auto;
+}
+
+.admin-table-card table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+}
+
+.admin-table-card th,
+.admin-table-card td {
+  border-block-start: 1px solid var(--glass-border);
+  padding: 13px 10px;
+  text-align: start;
+}
+
+.admin-table-card th {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.admin-table-card td span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.admin-table-card mark {
+  border-radius: 999px;
+  padding: 5px 9px;
+  color: var(--text-primary);
+  background: color-mix(in oklab, var(--accent-live) 24%, transparent);
+}
+
+.admin-table-card td button {
+  min-height: 36px;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  color: var(--text-primary);
+  background: var(--glass-fill);
+  font-weight: 900;
+}
+
+.ops-panel dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.ops-panel dl div,
+.audit-panel article {
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 12px;
+  background: color-mix(in oklab, var(--glass-fill-strong) 64%, transparent);
+}
+
+.ops-panel dt {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.ops-panel dd {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 950;
+  font-variant-numeric: tabular-nums;
+}
+
+.audit-panel {
+  display: grid;
+  gap: 10px;
+}
+
+@media (max-width: 560px) {
+  .topbar,
+  .admin-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+  }
+
+  .hero-focus-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-focus-panel .progress-ring {
+    grid-row: auto;
+    grid-column: auto;
+  }
+}
+
+@media (min-width: 760px) {
+  .dashboard-hero {
+    grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+    align-items: stretch;
+    min-height: 320px;
+  }
+
+  .auth-layout {
+    grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
+    align-items: stretch;
+  }
+
+  .auth-panel {
+    display: grid;
+    align-content: center;
+    padding: 28px;
+  }
+
+  .admin-kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .desktop-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-block-end: 16px;
+  }
+
+  .desktop-tabs button {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    padding-inline: 14px;
+    color: var(--text-secondary);
+    background: color-mix(in oklab, var(--glass-fill-strong) 60%, transparent);
+    font-weight: 900;
+  }
+
+  .desktop-tabs button.active {
+    color: var(--text-primary);
+    background: color-mix(in oklab, var(--brand-blue) 32%, var(--glass-fill));
+  }
+
+  .dashboard-overview.screen.active {
+    grid-template-columns: 1.12fr 0.88fr;
+  }
+
+  .dashboard-overview .task-strip {
+    grid-column: 1 / -1;
+  }
+
+  .admin-frame {
+    grid-template-columns: 260px minmax(0, 1fr);
+    padding: 18px;
+  }
+
+  .admin-sidebar {
+    position: sticky;
+    top: 18px;
+    min-height: calc(100dvh - 36px);
+  }
+
+  .admin-sidebar nav {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-workspace {
+    grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.6fr);
+    align-items: start;
+  }
+
+  .admin-table-card {
+    grid-row: span 3;
+  }
+}

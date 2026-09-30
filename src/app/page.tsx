@@ -1,5 +1,5 @@
-import { DababaShell } from "@/components/dababa-shell";
+import { DashboardShell } from "@/features/dashboard/dashboard-shell";
 
 export default function Home() {
-  return <DababaShell />;
+  return <DashboardShell />;
 }
