@@ -166,7 +166,8 @@ export function AuthPage() {
 
     try {
       const supabase = createSupabaseBrowserClient();
-      const email = authEmail.trim().toLowerCase();
+      const loginId = authEmail.trim().toLowerCase();
+      const email = loginId === "admin" ? "admin@dababa.local" : loginId;
       const password = authPassword;
       const result = authMode === "signup"
         ? await supabase.auth.signUp({ email, password, options: { data: { display_name: displayName.trim() || email.split("@")[0] } } })
@@ -268,7 +269,7 @@ export function AuthPage() {
               <h2>{authMode === "signup" ? pick(locale, "ابدأ حسابك", "Start your account") : pick(locale, "ادخل لحسابك", "Sign in")}</h2>
               <div className="auth-mode" role="group" aria-label={pick(locale, "اختيار الدخول", "Auth mode")}><button className={authMode === "signup" ? "active" : ""} onClick={() => setAuthMode("signup")} type="button">{pick(locale, "تسجيل جديد", "Sign up")}</button><button className={authMode === "signin" ? "active" : ""} onClick={() => setAuthMode("signin")} type="button">{pick(locale, "دخول", "Sign in")}</button></div>
               {authMode === "signup" ? <label><span>{pick(locale, "الاسم", "Name")}</span><input autoComplete="name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder={pick(locale, "اسمك", "Your name")} /></label> : null}
-              <label><span>{pick(locale, "البريد", "Email")}</span><input autoComplete="email" inputMode="email" required type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="you@example.com" /></label>
+              <label><span>{pick(locale, "البريد أو اسم المستخدم", "Email or username")}</span><input autoComplete="username" inputMode="email" required type="text" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="admin أو you@example.com" /></label>
               <label><span>{pick(locale, "كلمة المرور", "Password")}</span><input autoComplete={authMode === "signup" ? "new-password" : "current-password"} minLength={6} required type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="********" /></label>
               <button className="auth-submit" disabled={authBusy} type="submit">{authBusy ? <Loader2 className="spin" size={17} /> : null}{authBusy ? pick(locale, "جار التنفيذ", "Working") : authMode === "signup" ? pick(locale, "إنشاء الحساب", "Create account") : pick(locale, "تسجيل الدخول", "Sign in")}</button>
               <button className="google-button" disabled={authBusy} onClick={handleGoogleAuth} type="button"><span>G</span>{pick(locale, "المتابعة باستخدام Google", "Continue with Google")}</button>
@@ -281,6 +282,7 @@ export function AuthPage() {
     </main>
   );
 }
+
 
 
 

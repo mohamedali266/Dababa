@@ -8,14 +8,12 @@ type AdminContext = {
   userId: string;
   email: string | null;
   isPlatformAdmin: boolean;
-  canBootstrap: boolean;
   staffGymIds: string[];
 };
 
 const roleNames = ["super_admin", "admin", "platform_admin"];
 const staffRoleNames = ["owner", "coach"];
 
-const bootstrapSchema = z.object({ action: z.literal("bootstrapPlatformAdmin") });
 const createGymSchema = z.object({
   action: z.literal("createGym"),
   name: z.string().trim().min(2).max(120),
@@ -42,7 +40,7 @@ const updateBrandingSchema = z.object({
   })
 });
 
-const actionSchema = z.discriminatedUnion("action", [bootstrapSchema, createGymSchema, createAthleteCodeSchema, updateBrandingSchema]);
+const actionSchema = z.discriminatedUnion("action", [createGymSchema, createAthleteCodeSchema, updateBrandingSchema]);
 
 function jsonError(message: string, status: number) {
   return NextResponse.json({ error: message }, { status });
@@ -54,10 +52,9 @@ async function getContext(): Promise<AdminContext | null> {
   if (error || !user) return null;
 
   const adminSupabase = createSupabaseAdminClient();
-  const [{ data: roles }, { data: staffRows }, { data: adminRows }] = await Promise.all([
+  const [{ data: roles }, { data: staffRows }] = await Promise.all([
     adminSupabase.from("user_roles").select("role").eq("user_id", user.id),
     adminSupabase.from("gym_memberships").select("gym_id, role, status").eq("user_id", user.id).eq("status", "active"),
-    adminSupabase.from("user_roles").select("user_id").in("role", roleNames).limit(1)
   ]);
 
   const isPlatformAdmin = Boolean(roles?.some((row) => roleNames.includes(String(row.role))));
@@ -69,7 +66,6 @@ async function getContext(): Promise<AdminContext | null> {
     userId: user.id,
     email: user.email ?? null,
     isPlatformAdmin,
-    canBootstrap: !adminRows?.length,
     staffGymIds
   };
 }
@@ -88,7 +84,7 @@ export async function GET() {
 
   const adminSupabase = createSupabaseAdminClient();
   const allowedGymIds = context.isPlatformAdmin ? null : context.staffGymIds;
-  const isAllowed = context.isPlatformAdmin || context.staffGymIds.length > 0 || context.canBootstrap;
+  const isAllowed = context.isPlatformAdmin || context.staffGymIds.length > 0;
   if (!isAllowed) return jsonError("not_authorized", 403);
 
   const gymsQuery = adminSupabase
@@ -128,12 +124,6 @@ export async function POST(request: NextRequest) {
   const adminSupabase = createSupabaseAdminClient();
   const serverSupabase = await createSupabaseServerClient();
 
-  if (parsed.data.action === "bootstrapPlatformAdmin") {
-    if (!context.canBootstrap) return jsonError("bootstrap_closed", 403);
-    const { error } = await adminSupabase.from("user_roles").upsert({ user_id: context.userId, role: "platform_admin" }, { onConflict: "user_id,role" });
-    if (error) return jsonError(error.message, 500);
-    return NextResponse.json({ ok: true });
-  }
 
   if (parsed.data.action === "updateBranding") {
     if (!context.isPlatformAdmin) return jsonError("not_authorized", 403);
@@ -178,3 +168,4 @@ export async function POST(request: NextRequest) {
 
   return jsonError("unsupported_action", 400);
 }
+
