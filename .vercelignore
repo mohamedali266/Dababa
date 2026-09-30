@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.example
+.vercel
+.next
+node_modules
+*.tsbuildinfo
+.codex_design_brief.md
