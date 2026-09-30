@@ -1,0 +1,395 @@
+{
+  "$schema_note": "Project guild for Codex. Read this file completely before writing any code. Every rule marked MUST or NEVER is mandatory, not a suggestion.",
+  "version": "1.1.0",
+  "project": {
+    "name": "FitPulse (working name)",
+    "type": "Fitness web app, installable as PWA, mobile-first",
+    "summary": "Users sign up and receive: (1) an AI-generated personalized training plan, (2) performance and weight tracking per exercise plus activity tracking, (3) an AI-generated daily calorie and macro plan, (4) water intake reminders and tracking, (5) supplements and vitamins schedule. Includes push notifications and an admin dashboard.",
+    "languages": [
+      "ar (default, RTL)",
+      "en (LTR)"
+    ],
+    "stack": {
+      "framework": "Next.js (App Router) + TypeScript strict mode",
+      "styling": "Tailwind CSS with custom design tokens (CSS variables). No prebuilt UI kit look.",
+      "backend": "Supabase (Postgres, Auth, Row Level Security, Storage, Edge Functions if needed)",
+      "hosting": "Vercel (confirmed). Use Vercel Environment Variables per environment (Production / Preview / Development), Preview Deployments for review, Vercel Cron for scheduled jobs, and Edge/Node runtime chosen per route on purpose.",
+      "pwa": "Web App Manifest + Service Worker + Web Push (VAPID)",
+      "validation": "Zod on every input, client and server",
+      "ai": "Server-side only calls, structured JSON output validated with Zod",
+      "theming": "Light and Dark themes (plus System) driven by semantic CSS variables. See design_system.theming."
+    }
+  },
+  "role_of_codex": {
+    "identity": "Act as a senior professional team in one: a web application architect, a product/UI designer with strong responsive layout skills, a clean-code backend engineer, and an application security engineer.",
+    "mindset": [
+      "Design first, then build. Decide layout, hierarchy and motion before writing components.",
+      "Write organized, modular, readable code with clear separation of concerns.",
+      "Think like an attacker before shipping any endpoint, query or form.",
+      "If a requirement is ambiguous, choose the safest and most maintainable option and document the decision in a short comment or docs/decisions.md."
+    ]
+  },
+  "design_system": {
+    "reference_style_name": "Dark Glass Athletic (primary) + Light Frost (companion)",
+    "reference_description": "The visual reference is a premium dark-blue fitness app: full-bleed athletic imagery with electric-blue rim light and motion blur, deep navy gradients, frosted-glass (glassmorphism) cards floating over the imagery, very rounded shapes, circular icon buttons, thin-line icons, semicircular gauge and circular progress rings, one neon accent for live states, and bold rounded geometric typography with generous spacing. The Light theme keeps the same DNA (glass layers, rounded shapes, gauges, blue energy) translated into a bright, airy, frosted look. It is a true redesign of the palette, not an inverted dark theme.",
+    "strict_anti_template_rules": [
+      "NEVER produce the generic AI-app look: no default purple-to-blue gradient hero, no centered 'Welcome to X' hero with three identical feature cards, no white card grid with drop shadows, no emoji as icons, no stock Bootstrap/Material/shadcn default appearance left unmodified.",
+      "NEVER ship an unmodified component library theme. If a primitive library is used (for accessibility only, e.g. Radix), every visual property MUST come from this file's tokens.",
+      "NEVER use lorem ipsum, placeholder gray boxes, or 'coming soon' filler in finished screens.",
+      "NEVER repeat the same card layout more than twice in a row on a screen. Vary scale, density and shape to create rhythm and hierarchy.",
+      "NEVER center everything. Use deliberate asymmetry, large type against small labels, and overlap between imagery and glass panels.",
+      "NEVER use flat solid-color backgrounds for full screens. Backgrounds must be layered: deep gradient + soft blue glow + optional imagery + subtle noise/grain.",
+      "NEVER copy the reference image's photos, logo, or brand text. Recreate the style only. Use licensed, owned or generated imagery, and the app MUST still look complete with a gradient-only fallback when no photo is available.",
+      "NEVER treat Light mode as an afterthought or as an auto-inverted Dark mode. Both themes are designed deliberately from the same token set.",
+      "NEVER hardcode colors in components. Colors come only from semantic theme tokens so both themes stay consistent."
+    ],
+    "tokens": {
+      "color_note": "Components MUST consume semantic tokens (CSS variables) only. Raw hex values inside components are forbidden. Both themes below define the exact same token names.",
+      "color_dark": {
+        "bg_deep": "#050A18",
+        "bg_navy": "#0B1636",
+        "bg_indigo": "#12296B",
+        "brand_blue": "#2F6BFF",
+        "brand_blue_glow": "#3D8BFF",
+        "ice": "#BFD4FF",
+        "accent_live": "#3DFF7A",
+        "warning": "#FFB84D",
+        "danger": "#FF5C6C",
+        "text_primary": "#FFFFFF",
+        "text_secondary": "rgba(255,255,255,0.68)",
+        "text_muted": "rgba(255,255,255,0.45)",
+        "glass_fill": "rgba(255,255,255,0.10)",
+        "glass_fill_strong": "rgba(255,255,255,0.16)",
+        "glass_border": "rgba(255,255,255,0.18)",
+        "cta_bg": "#FFFFFF",
+        "cta_text": "#050A18"
+      },
+      "color_light": {
+        "bg_deep": "#EAF1FF",
+        "bg_navy": "#DCE8FF",
+        "bg_indigo": "#C9DBFF",
+        "brand_blue": "#1F5BFF",
+        "brand_blue_glow": "#4C86FF",
+        "ice": "#0E2A6B",
+        "accent_live": "#0FB84A",
+        "warning": "#D98200",
+        "danger": "#D92D43",
+        "text_primary": "#0A1330",
+        "text_secondary": "rgba(10,19,48,0.72)",
+        "text_muted": "rgba(10,19,48,0.52)",
+        "glass_fill": "rgba(255,255,255,0.58)",
+        "glass_fill_strong": "rgba(255,255,255,0.78)",
+        "glass_border": "rgba(255,255,255,0.85)",
+        "cta_bg": "#0A1330",
+        "cta_text": "#FFFFFF"
+      },
+      "color_light_notes": [
+        "accent_live and warning are darkened in Light so they pass WCAG AA on bright surfaces. Never reuse the neon dark-theme green on a light background.",
+        "The primary CTA inverts to a dark pill with white text in Light, keeping the same shape and circular arrow chip.",
+        "Never use pure #FFFFFF as a full-screen background. Use the layered light gradient so glass panels stay visible."
+      ],
+      "background_recipe_dark": "linear-gradient(160deg, bg_deep 0%, bg_navy 45%, bg_indigo 100%) + radial blue glow behind the main subject + 2 to 3 blurred blue blobs + 3 percent grain overlay",
+      "background_recipe_light": "linear-gradient(160deg, bg_deep 0%, bg_navy 55%, bg_indigo 100%) + soft radial brand_blue glow at 12 to 18 percent opacity behind the main subject + 2 to 3 blurred pale-blue and white blobs + 2 percent grain overlay",
+      "glass_recipe_dark": "background: glass_fill; backdrop-filter: blur(18px) saturate(140%); border: 1px solid glass_border; inner top highlight via inset box-shadow; soft blue-tinted outer shadow. Provide a solid-tint fallback with @supports not (backdrop-filter).",
+      "glass_recipe_light": "background: glass_fill; backdrop-filter: blur(22px) saturate(160%); border: 1px solid glass_border; inset white top highlight; soft blue-tinted shadow (for example 0 12px 32px rgba(31,91,255,0.14)) so cards separate from the bright background. Solid-tint fallback with @supports not (backdrop-filter).",
+      "color": {
+        "bg_deep": "#050A18",
+        "bg_navy": "#0B1636",
+        "bg_indigo": "#12296B",
+        "brand_blue": "#2F6BFF",
+        "brand_blue_glow": "#3D8BFF",
+        "ice": "#BFD4FF",
+        "accent_live": "#3DFF7A",
+        "warning": "#FFB84D",
+        "danger": "#FF5C6C",
+        "text_primary": "#FFFFFF",
+        "text_secondary": "rgba(255,255,255,0.68)",
+        "text_muted": "rgba(255,255,255,0.45)",
+        "glass_fill": "rgba(255,255,255,0.10)",
+        "glass_fill_strong": "rgba(255,255,255,0.16)",
+        "glass_border": "rgba(255,255,255,0.18)",
+        "cta_bg": "#FFFFFF",
+        "cta_text": "#050A18"
+      },
+      "radius": {
+        "screen_frame": "40px",
+        "card_large": "28px",
+        "card_small": "20px",
+        "pill": "9999px",
+        "icon_button": "50%"
+      },
+      "spacing_scale_px": [
+        4,
+        8,
+        12,
+        16,
+        20,
+        24,
+        32,
+        40,
+        56,
+        72
+      ],
+      "typography": {
+        "latin_display": "Rounded geometric sans, wide and bold for headings (e.g. Montserrat, Outfit or Sora via next/font, self-hosted)",
+        "arabic": "Cairo or IBM Plex Sans Arabic via next/font. Arabic MUST have its own tuned line-height (about 1.6) and weights, never a fallback system font.",
+        "scale": "Use fluid type with clamp(). Big greeting/metric numbers (28 to 56px) contrasted with small labels (11 to 13px).",
+        "numbers": "Use tabular-nums for stats, timers, weights and calories."
+      },
+      "motion": {
+        "duration_ms": {
+          "micro": 150,
+          "standard": 280,
+          "emphasis": 450
+        },
+        "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "rules": [
+          "Animate transform and opacity only.",
+          "Rings and gauges animate from 0 to value on first view.",
+          "Bottom sheets support drag handle and swipe.",
+          "MUST respect prefers-reduced-motion by disabling non-essential motion."
+        ]
+      }
+    },
+    "theming": {
+      "modes": [
+        "dark",
+        "light",
+        "system"
+      ],
+      "default": "system (follow prefers-color-scheme). If unsure, fall back to dark because it is the flagship look.",
+      "implementation": [
+        "Set the theme via a data-theme='light'|'dark' attribute on <html> and define all semantic tokens as CSS variables per theme. Tailwind darkMode uses the same attribute selector, so utilities and tokens never disagree.",
+        "Declare color-scheme per theme so native controls, scrollbars and form fields match.",
+        "Persist the choice in a cookie (and profile setting when signed in) and read it on the server so the first paint is already correct. Add a tiny blocking inline script for 'system' mode. NO flash of the wrong theme (FOUC) is acceptable.",
+        "Update <meta name='theme-color'> dynamically with media-query variants, and provide theme-aware PWA icons, splash screens and status-bar style. Manifest colors stay valid for both.",
+        "Theme toggle (Light / Dark / System) lives in Settings and as a quick glass icon button in the header. Switching animates with a short 200ms color transition, disabled under prefers-reduced-motion.",
+        "Charts, rings, gauges, skeletons, toasts, bottom sheets, the tab bar, the admin panel and email/notification visuals ALL read the same semantic tokens and must be checked in both themes."
+      ],
+      "light_theme_design_rules": [
+        "Light Frost is airy and luminous: pale blue gradient atmosphere, frosted white glass, deep navy text, electric blue as the single energetic accent.",
+        "Depth comes from blur, soft blue-tinted shadows and thin white borders, not from heavy gray shadows or hard outlines.",
+        "Hero imagery uses a brighter, cooler grade with a light gradient scrim. Text over imagery must still pass AA. Gradient-only fallback must look finished in both themes.",
+        "Keep the same signature components (glass cards, bottom sheet, circular icon buttons, progress ring, semi gauge, toggle) with the same shapes and radii. Only the token values change, never the structure.",
+        "NEVER let Light mode collapse into a generic white dashboard with gray borders and default shadows. It must remain visibly the same brand."
+      ],
+      "contrast_requirements": "Every text/background and icon/background pair MUST pass WCAG AA in BOTH themes (4.5:1 body, 3:1 large text and UI components). Verify glass panels over the brightest and darkest parts of the background and imagery.",
+      "testing": "Every screen and component is verified in Light, Dark and System at all breakpoints, RTL and LTR, including focus rings, disabled states, charts and empty/error states."
+    },
+    "signature_components": {
+      "glass_card": "Frosted panel with 28px radius, used for stats, active task, previous tasks and settings groups.",
+      "bottom_sheet": "Rounded top sheet with a small drag handle, slides over full-bleed imagery. Used for sign in / sign up and quick actions.",
+      "primary_cta": "White pill button with dark label and a black circular arrow chip at the end (flip the arrow direction in RTL).",
+      "secondary_cta": "Translucent glass pill next to the primary, text-only ('or log in').",
+      "icon_button": "Circular glass button 44 to 48px minimum, thin-line icon (1.5px stroke, single consistent icon set).",
+      "stat_chip_row": "Row of small circular glass icons for metric categories (distance, time, calories, achievements).",
+      "progress_ring": "Circular progress with thin track and thick rounded progress stroke, percentage in the center.",
+      "semi_gauge": "Semicircular gauge with radial tick marks, active ticks in white/ice, live marker dot in accent_live, big percentage inside.",
+      "toggle_switch": "Pill toggle with a neon green knob when on, used for features like Smart Tracking.",
+      "live_badge": "Small black pill with tiny green dot for states like 'Auto mode'.",
+      "metric_row": "Glass row with circular icon at start, label, and value with unit stacked at the end, separated by hairline dividers."
+    },
+    "screens_to_design": {
+      "onboarding_welcome": "Full-bleed athletic image or gradient scene, logo top-start, bottom sheet with headline, short supporting text, Sign Up primary CTA and Log in secondary CTA.",
+      "onboarding_assessment": "Multi-step conversational flow, one focused question per step, large tappable options, progress indicator, back navigation, saved progress. See ai_features.assessment.",
+      "home_dashboard": "Personal greeting, My Health section with weekly stats glass card and Add Task button, Active Task card with streak and progress ring and steps goal, Previous Tasks row with completion ring and View All.",
+      "workout_session": "Today's workout with exercise list, sets/reps/weight inputs optimized for one-handed use, rest timer, previous performance shown inline, PR highlight.",
+      "tracking_live": "Track Record style screen: semi gauge, duration, distance, Smart Tracking toggle.",
+      "nutrition": "Daily calorie ring with macro breakdown, meal log, AI plan view.",
+      "hydration": "Water goal ring or bottle fill visual, quick add buttons (250 / 500 ml), reminder schedule.",
+      "supplements": "Daily checklist with time slots, dosage, notes, streak.",
+      "progress": "Weight and per-exercise charts, body measurements, weekly report.",
+      "notifications_settings": "Granular toggles per reminder type, quiet hours, permission flow.",
+      "admin_dashboard": "Separate layout and route group. Same visual language but denser and data-oriented. See admin_panel."
+    },
+    "images": {
+      "usage": "Hero and empty-state imagery only, never required for function.",
+      "treatment": "Dark: blue duotone or rim-light grade with subtle motion blur and a dark gradient scrim. Light: brighter cool grade with a pale gradient scrim. Text must always pass contrast in both.",
+      "performance": "next/image, AVIF/WebP, correct sizes, blur placeholder, lazy load below the fold, priority only for the LCP image."
+    }
+  },
+  "responsive_rules": {
+    "principle": "MUST-HAVE: every screen is designed for the phone first, then intentionally re-composed for tablet and desktop. Never just stretch or center the phone layout.",
+    "breakpoints_px": {
+      "xs": 360,
+      "sm": 640,
+      "md": 768,
+      "lg": 1024,
+      "xl": 1280,
+      "2xl": 1536
+    },
+    "phone": [
+      "Design at 360 to 430px width first. Test at 320px as the minimum.",
+      "Single column, bottom tab bar (glass, floating) with 4 to 5 destinations, safe-area insets via env(safe-area-inset-*).",
+      "Touch targets at least 44x44px, primary actions reachable by thumb in the lower half of the screen.",
+      "Use dvh/svh units, never 100vh, to avoid mobile browser toolbar jumps.",
+      "Inputs at 16px minimum font size to prevent iOS zoom. Use correct inputmode and autocomplete attributes.",
+      "Bottom sheets instead of modals; no tiny hover-dependent controls."
+    ],
+    "tablet": [
+      "Two-column compositions: content plus a contextual side panel (for example workout list beside exercise detail).",
+      "Navigation may become a slim side rail."
+    ],
+    "desktop": [
+      "Persistent sidebar navigation, multi-column dashboard grid, max content width around 1280px.",
+      "Charts and tables get more room and richer detail; hover and keyboard states are fully designed.",
+      "Background imagery and glow become a large-scale atmospheric backdrop, not a stretched phone screen."
+    ],
+    "rtl_ltr": [
+      "Use CSS logical properties everywhere (margin-inline-start, padding-inline-end, inset-inline, text-align: start).",
+      "Arabic is the default locale with dir='rtl'. Mirror layout, chevrons, progress direction and arrow icons.",
+      "Numbers may use Arabic-Indic or Latin digits by user preference; keep charts readable in both directions."
+    ],
+    "verification": "Before finishing any screen, check it at 360, 390, 430, 768, 1024, 1440 px, in RTL and LTR, in Light, Dark and System themes, with long Arabic text and large font-size settings."
+  },
+  "accessibility_and_quality": {
+    "contrast": "Text over glass or imagery MUST meet WCAG AA in both Light and Dark themes. Add a scrim when needed.",
+    "keyboard_and_screen_readers": "Full keyboard operability, visible focus ring in brand_blue_glow, semantic HTML, ARIA only where needed, chart data also available as text.",
+    "performance_budgets": "LCP under 2.5s on mid-range mobile, CLS under 0.1, INP under 200ms. Limit backdrop-filter to a few layers per screen and avoid nesting blurs. Theme switching must not cause layout shift or a flash of the wrong theme.",
+    "no_dead_ui": "Every button, toggle and link must work or be removed. Include loading, empty, error and offline states for every screen."
+  },
+  "architecture_and_code_quality": {
+    "structure": {
+      "src/app": "Routes grouped as (marketing), (auth), (app) for users, (admin) for admins, api for route handlers",
+      "src/features": "One folder per domain: workouts, nutrition, hydration, supplements, tracking, plans, notifications, admin",
+      "src/components/ui": "Own design-system primitives built from the tokens above",
+      "src/lib": "supabase clients (browser, server, admin), ai client, push, validators, utils",
+      "src/server": "Server-only services and data-access functions, never imported by client code",
+      "supabase/migrations": "All schema changes as versioned SQL migrations, never manual dashboard edits",
+      "docs": "Architecture, security model, decisions"
+    },
+    "rules": [
+      "TypeScript strict, no 'any', no unused code, no dead files.",
+      "Small single-purpose functions and components. Business logic lives in services, not in UI components.",
+      "Data access is centralized in server-side functions with typed results. Components never build raw queries ad hoc.",
+      "Use Server Components and Server Actions/route handlers for mutations; keep client bundles small.",
+      "Consistent naming, ESLint + Prettier + strict TS in CI, and tests for plan generation parsing, calorie math, water math and permission checks.",
+      "Environment variables are validated at startup with Zod. Never hardcode secrets or URLs.",
+      "Handle errors explicitly. Never swallow errors, never return raw database or stack errors to users."
+    ]
+  },
+  "database_and_backend": {
+    "principles": [
+      "Every table has Row Level Security ENABLED with explicit policies. A table without RLS is a bug.",
+      "Default deny. Users can read and write only their own rows (user_id = auth.uid()).",
+      "Use foreign keys, NOT NULL, CHECK constraints, unique constraints and proper indexes. Use timestamptz and store all times in UTC.",
+      "Separate concerns into tables: profiles, health_assessments, training_plans, plan_days, plan_exercises, workout_logs, set_logs, body_metrics, nutrition_plans, meal_logs, water_logs, supplement_plans, supplement_logs, push_subscriptions, notification_prefs, audit_logs, ai_requests."
+    ],
+    "roles": {
+      "model": "Roles live in a dedicated table (user_roles) or in app_metadata set only by the server. NEVER derive role from user_metadata or any field the user can edit.",
+      "roles_list": [
+        "user",
+        "admin",
+        "super_admin"
+      ],
+      "separation": "Admin actions run through server-side code that re-verifies the role on every request. Admin data access uses dedicated RLS policies or a server-only service role, never a client-side check alone.",
+      "least_privilege": "Admins see only what the admin panel requires. Sensitive health data access by admins is limited, logged in audit_logs, and never bulk-exportable without super_admin."
+    }
+  },
+  "security": {
+    "mandate": "Act as an information security specialist. Never introduce a vulnerability, never trade security for speed, and never mix privileges between roles.",
+    "must": [
+      "The Supabase service_role key is used ONLY in server-side code and NEVER exposed to the browser, prefixed with NEXT_PUBLIC_, logged, or committed.",
+      "Validate and sanitize every input with Zod on the server, even if the client already validated it. Reject unknown fields.",
+      "Use parameterized queries or the Supabase client only. No string-built SQL. Any SQL function marked SECURITY DEFINER must set search_path and be reviewed.",
+      "Authorization is checked on every server action and route handler (authentication + role + ownership). Never trust IDs sent from the client without checking ownership (prevent IDOR).",
+      "Protect against XSS: no dangerouslySetInnerHTML with user or AI content, escape output, and set a strict Content-Security-Policy.",
+      "Add security headers: CSP, HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, frame-ancestors none.",
+      "CSRF protection for cookie-authenticated mutations (same-site cookies, origin checks, Server Actions built-in protections).",
+      "Rate limit auth, AI generation, push subscription and any expensive endpoint per user and per IP. Cap AI usage and cost per user per day.",
+      "Secure auth: email verification, strong password policy, secure httpOnly session cookies, optional MFA for admins (MFA REQUIRED for admin and super_admin).",
+      "Storage buckets are private by default with policies scoped to owner folders. Validate file type and size.",
+      "Never log secrets, tokens or health data. Redact personal data in logs. Keep an audit log for admin actions.",
+      "Push notifications: store subscriptions per user, send only from the server with VAPID private key kept secret, and remove expired subscriptions.",
+      "Keep dependencies minimal, pinned and audited. Run npm audit and secret scanning in CI.",
+      "Service worker MUST NOT cache authenticated API responses or personal data in shared caches, and MUST clear caches on logout."
+    ],
+    "never": [
+      "NEVER disable RLS to 'make it work'.",
+      "NEVER check admin status only in the frontend.",
+      "NEVER put secrets, service keys or admin logic in client components.",
+      "NEVER expose stack traces, SQL errors or internal IDs in error messages.",
+      "NEVER trust client-provided user_id, role, price, calorie totals or plan data.",
+      "NEVER let one role's code path reuse another role's privileges or data-access helpers."
+    ],
+    "privacy": "Health data is sensitive. Collect the minimum, explain why each question is asked, get explicit consent, and provide account and data deletion and export."
+  },
+  "ai_features": {
+    "assessment": {
+      "purpose": "Before generating any plan, collect through a friendly multi-step questionnaire: basic data (age, sex, height, weight, goal), daily routine and activity level, medical conditions, injuries and medications, available training days per week, session length, equipment access, training experience level, food preferences and allergies, sleep, and water habits.",
+      "rules": "Progressive disclosure, one topic per step, saved as draft, editable later."
+    },
+    "training_plan": "Generate a personalized weekly plan (split, exercises, sets, reps, rest, progression) matched to experience, days per week, equipment, injuries and goal.",
+    "nutrition_plan": "Generate daily calories and macros from the user's data with the formula and assumptions stored, plus adjustments over time based on tracked progress.",
+    "hydration": "Compute a daily water target from weight, activity and climate and schedule reminders.",
+    "supplements": "Suggest common supplements and vitamins with general dosage ranges and timing, always framed as informational.",
+    "engineering_rules": [
+      "All AI calls happen on the server. The API key is never exposed to the client.",
+      "Request structured JSON output and validate it with Zod. On invalid output, retry once, then fail gracefully.",
+      "Treat all AI output as untrusted data. Never execute it, never render it as raw HTML, and clamp numeric values to safe ranges (calories, water, dosages, weights).",
+      "Guard against prompt injection: user free text is passed as data, never as instructions.",
+      "Store the version of the prompt and inputs used for each generated plan for traceability.",
+      "Log usage per user and enforce quotas."
+    ],
+    "safety": [
+      "If the user reports medical conditions, pregnancy, eating disorders, injuries or medication use, generate conservative plans and show a clear message recommending a doctor's review.",
+      "Never present output as medical diagnosis or treatment. Show a concise disclaimer in plan and supplements screens.",
+      "Enforce minimum calorie floors and safe weight-change rates."
+    ]
+  },
+  "pwa_and_notifications": {
+    "pwa": [
+      "Valid manifest with name, short_name, icons (including maskable), theme_color and background_color from the tokens, display standalone, start_url, and RTL-aware lang/dir.",
+      "Service worker with an app-shell strategy, offline fallback page, and safe caching rules per the security section.",
+      "Custom install prompt UI in the app's style, iOS 'Add to Home Screen' guidance, splash screens, and correct status-bar styling.",
+      "Workout logging should keep working offline and sync when the connection returns, with conflict handling.",
+      "Provide theme-aware theme-color meta tags (light and dark variants), adaptive icons and splash screens for both themes."
+    ],
+    "notifications": [
+      "Web Push with VAPID. Ask permission only after value is shown, never on first load.",
+      "Types: workout reminder, water reminder, supplement time, meal reminder, weekly progress. Each individually toggleable with quiet hours and the user's time zone respected.",
+      "Scheduled sending through a server-side scheduler (Supabase cron / Vercel cron) with idempotency to avoid duplicates.",
+      "Notification content must not reveal sensitive health details on the lock screen."
+    ]
+  },
+  "admin_panel": {
+    "location": "Separate route group (admin) with its own layout, middleware protection, and server-side role verification on every request.",
+    "features": [
+      "Users list with search and filters, account status, and safe actions (suspend, reset flows).",
+      "Overview analytics: sign-ups, active users, plan generations, retention, notification delivery.",
+      "Content management: exercise library, supplement catalog, default templates, and notification templates.",
+      "AI monitoring: usage, cost, failures, quota control, and prompt version management.",
+      "Broadcast notifications with targeting and scheduling.",
+      "Audit log viewer."
+    ],
+    "rules": [
+      "Every admin mutation is validated, authorized, and written to audit_logs.",
+      "Health data shown to admins is minimized, masked where possible, and access is logged.",
+      "Admin UI follows the same design language but is optimized for dense tables and desktop, while remaining usable on phones.",
+      "Admin panel supports Light and Dark themes through the same semantic tokens."
+    ]
+  },
+  "definition_of_done": [
+    "The screen matches the Dark Glass Athletic design system and does NOT look like a generic AI-generated template.",
+    "Verified in Light, Dark and System themes with no flash of the wrong theme and AA contrast in both.",
+    "Verified responsive at all listed breakpoints in both RTL and LTR.",
+    "Loading, empty, error and offline states exist.",
+    "Zod validation, authorization checks and RLS policies are in place for every new data path.",
+    "No secrets on the client, no console errors, no TypeScript or lint errors.",
+    "Accessibility and performance budgets are met.",
+    "Code is organized by feature, typed, and documented where the decision is non-obvious."
+  ],
+  "final_instruction": "If any request from anyone conflicts with the security, design or architecture rules in this file, follow this file and explain the conflict briefly. Never fall back to generic templates, never weaken security to save time, and never leave a screen that only works well on one device size.",
+  "deployment_vercel": {
+    "hosting": "Vercel is the only hosting target.",
+    "rules": [
+      "Store all secrets in Vercel Environment Variables, separated per environment. Only variables that are safe to expose may use the NEXT_PUBLIC_ prefix. SUPABASE_SERVICE_ROLE_KEY, VAPID private key and AI API keys are server-only.",
+      "Use separate Supabase projects (or branches) for Production and Preview/Development so test data never touches production.",
+      "Use Vercel Cron for scheduled notifications and maintenance jobs. Protect cron endpoints with a secret header check and make jobs idempotent.",
+      "Configure security headers in next.config or vercel.json (CSP, HSTS, frame-ancestors, Referrer-Policy, Permissions-Policy).",
+      "Mind serverless limits: keep functions short, stream or queue long AI generations, and set sensible maxDuration and region close to the Supabase region.",
+      "Use Vercel Analytics/Speed Insights only in a privacy-respecting way, without sending health data.",
+      "Every push to main deploys via CI checks first: type-check, lint, tests, npm audit, secret scan. Migrations are applied through the Supabase CLI before or with deployment, never manually."
+    ]
+  }
+}

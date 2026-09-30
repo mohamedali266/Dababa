@@ -1,0 +1,21 @@
+{
+  "name": "Dababa Fitness",
+  "short_name": "Dababa",
+  "description": "Arabic-first fitness training, nutrition, hydration, supplements, and progress tracking.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "ar",
+  "dir": "rtl",
+  "background_color": "#050A18",
+  "theme_color": "#050A18",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
