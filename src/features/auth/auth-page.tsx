@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, Languages, Loader2, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eye, EyeOff, Languages, Loader2, LockKeyhole, Mail, ShieldCheck, UserRound } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import { GlassCard } from "@/components/ui/primitives";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -31,9 +31,11 @@ export function AuthPage() {
   const [needsAthleteCode, setNeedsAthleteCode] = useState(false);
   const [athleteCode, setAthleteCode] = useState("");
   const [codeBusy, setCodeBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const t = copy[locale];
   const isRtl = locale === "ar";
   const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
+  const PasswordIcon = showPassword ? EyeOff : Eye;
 
   useEffect(() => {
     const root = document.documentElement;
@@ -168,6 +170,7 @@ export function AuthPage() {
       const supabase = createSupabaseBrowserClient();
       const loginId = authEmail.trim().toLowerCase();
       const email = loginId === "admin" ? "admin@dababa.local" : loginId;
+      if (authMode === "signup" && !email.includes("@")) throw new Error("signup_email_required");
       const password = authPassword;
       const result = authMode === "signup"
         ? await supabase.auth.signUp({ email, password, options: { data: { display_name: displayName.trim() || email.split("@")[0] } } })
@@ -268,9 +271,11 @@ export function AuthPage() {
               <span className="eyebrow">{pick(locale, "دخول دبابة", "Dababa auth")}</span>
               <h2>{authMode === "signup" ? pick(locale, "ابدأ حسابك", "Start your account") : pick(locale, "ادخل لحسابك", "Sign in")}</h2>
               <div className="auth-mode" role="group" aria-label={pick(locale, "اختيار الدخول", "Auth mode")}><button className={authMode === "signup" ? "active" : ""} onClick={() => setAuthMode("signup")} type="button">{pick(locale, "تسجيل جديد", "Sign up")}</button><button className={authMode === "signin" ? "active" : ""} onClick={() => setAuthMode("signin")} type="button">{pick(locale, "دخول", "Sign in")}</button></div>
-              {authMode === "signup" ? <label><span>{pick(locale, "الاسم", "Name")}</span><input autoComplete="name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder={pick(locale, "اسمك", "Your name")} /></label> : null}
-              <label><span>{pick(locale, "البريد أو اسم المستخدم", "Email or username")}</span><input autoComplete="username" inputMode="email" required type="text" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="admin أو you@example.com" /></label>
-              <label><span>{pick(locale, "كلمة المرور", "Password")}</span><input autoComplete={authMode === "signup" ? "new-password" : "current-password"} minLength={6} required type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="********" /></label>
+              <div className="auth-field-stack">
+                {authMode === "signup" ? <label className="auth-field"><span>{pick(locale, "الاسم", "Name")}</span><div className="auth-input-wrap"><UserRound size={18} /><input autoComplete="name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder={pick(locale, "اسمك", "Your name")} /></div></label> : null}
+                <label className="auth-field"><span>{pick(locale, authMode === "signin" ? "البريد أو اسم المستخدم" : "البريد", authMode === "signin" ? "Email or username" : "Email")}</span><div className="auth-input-wrap"><Mail size={18} /><input autoComplete="username" inputMode="email" required type="text" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder={authMode === "signin" ? "admin أو you@example.com" : "you@example.com"} /></div></label>
+                <label className="auth-field"><span>{pick(locale, "كلمة المرور", "Password")}</span><div className="auth-input-wrap"><LockKeyhole size={18} /><input autoComplete={authMode === "signup" ? "new-password" : "current-password"} minLength={6} required type={showPassword ? "text" : "password"} value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="********" /><button aria-label={pick(locale, showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور", showPassword ? "Hide password" : "Show password")} onClick={() => setShowPassword((value) => !value)} type="button"><PasswordIcon size={18} /></button></div></label>
+              </div>
               <button className="auth-submit" disabled={authBusy} type="submit">{authBusy ? <Loader2 className="spin" size={17} /> : null}{authBusy ? pick(locale, "جار التنفيذ", "Working") : authMode === "signup" ? pick(locale, "إنشاء الحساب", "Create account") : pick(locale, "تسجيل الدخول", "Sign in")}</button>
               <button className="google-button" disabled={authBusy} onClick={handleGoogleAuth} type="button"><span>G</span>{pick(locale, "المتابعة باستخدام Google", "Continue with Google")}</button>
               {authMessage ? <span className="auth-message">{authMessage}</span> : null}
@@ -282,6 +287,8 @@ export function AuthPage() {
     </main>
   );
 }
+
+
 
 
 
