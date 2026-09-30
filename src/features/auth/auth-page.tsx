@@ -69,20 +69,54 @@ export function AuthPage() {
   useEffect(() => {
     let active = true;
     const supabase = createSupabaseBrowserClient();
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (!active) return;
-      const currentUser = data.session?.user ?? null;
-      setUserEmail(currentUser?.email ?? null);
-      if (currentUser) await ensureUserWorkspace(currentUser);
-    }).catch(() => {
-      if (active) setAuthMessage(pick(locale, "تعذر قراءة جلسة الدخول.", "Could not read the auth session."));
-    });
+
+    async function syncAuthSession() {
+      const currentUrl = new URL(window.location.href);
+      const authCode = currentUrl.searchParams.get("code");
+      const authError = currentUrl.searchParams.get("error_description") || currentUrl.searchParams.get("error");
+
+      if (authError) {
+        setAuthMessage(pick(locale, "تعذر إكمال الدخول عبر Google.", "Could not complete Google sign-in."));
+        window.history.replaceState({}, "", "/auth");
+        return;
+      }
+
+      try {
+        if (authCode) {
+          setAuthBusy(true);
+          const { data, error } = await supabase.auth.exchangeCodeForSession(authCode);
+          if (error) throw error;
+          const currentUser = data.session?.user ?? null;
+          if (!active) return;
+          setUserEmail(currentUser?.email ?? null);
+          if (currentUser) {
+            await ensureUserWorkspace(currentUser);
+            setAuthMessage(pick(locale, "تم تسجيل الدخول عبر Google.", "Google sign-in completed."));
+          }
+          window.history.replaceState({}, "", "/auth");
+          return;
+        }
+
+        const { data } = await supabase.auth.getSession();
+        if (!active) return;
+        const currentUser = data.session?.user ?? null;
+        setUserEmail(currentUser?.email ?? null);
+        if (currentUser) await ensureUserWorkspace(currentUser);
+      } catch {
+        if (active) setAuthMessage(pick(locale, "تعذر قراءة جلسة الدخول.", "Could not read the auth session."));
+      } finally {
+        if (active) setAuthBusy(false);
+      }
+    }
+
+    syncAuthSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const currentUser = session?.user ?? null;
       setUserEmail(currentUser?.email ?? null);
       if (!currentUser) setAssessmentDraftId(null);
       if (currentUser) {
+        setAuthBusy(false);
         ensureUserWorkspace(currentUser).catch(() => setAuthMessage(pick(locale, "تم الدخول، لكن تعذر تجهيز ملفك.", "Signed in, but workspace setup failed.")));
       }
     });
@@ -126,7 +160,7 @@ export function AuthPage() {
     setAuthMessage(null);
     try {
       const supabase = createSupabaseBrowserClient();
-      const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin } });
+      const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${window.location.origin}/auth` } });
       if (error) throw error;
     } catch {
       setAuthBusy(false);
@@ -181,5 +215,6 @@ export function AuthPage() {
     </main>
   );
 }
+
 
 
