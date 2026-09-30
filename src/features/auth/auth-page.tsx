@@ -84,37 +84,29 @@ export function AuthPage() {
 
     async function syncAuthSession() {
       const currentUrl = new URL(window.location.href);
-      const authCode = currentUrl.searchParams.get("code");
-      const authError = currentUrl.searchParams.get("error_description") || currentUrl.searchParams.get("error");
+      const authStatus = currentUrl.searchParams.get("auth_status");
+      const authError = currentUrl.searchParams.get("auth_error") || currentUrl.searchParams.get("error_description") || currentUrl.searchParams.get("error");
 
       if (authError) {
-        setAuthMessage(pick(locale, "تعذر إكمال الدخول عبر Google.", "Could not complete Google sign-in."));
+        setAuthMessage(pick(locale, "تعذر إكمال الدخول عبر Google. راجع إعدادات Callback ثم جرّب مرة أخرى.", "Could not complete Google sign-in. Check the callback settings and try again."));
         window.history.replaceState({}, "", "/auth");
         return;
       }
 
       try {
-        if (authCode) {
-          setAuthBusy(true);
-          const exchangeResult = await supabase.auth.exchangeCodeForSession(authCode);
-          const sessionResult = exchangeResult.data.session ? exchangeResult : await supabase.auth.getSession();
-          const currentUser = sessionResult.data.session?.user ?? null;
-
-          if (!currentUser) throw exchangeResult.error ?? new Error("OAuth session was not created.");
-          if (!active) return;
-
-          await prepareSignedInUser(currentUser, pick(locale, "تم تسجيل الدخول عبر Google.", "Google sign-in completed."));
-          window.history.replaceState({}, "", "/auth");
-          return;
-        }
-
         const { data, error } = await supabase.auth.getSession();
         if (error) throw error;
         if (!active) return;
         const currentUser = data.session?.user ?? null;
-        if (currentUser) await prepareSignedInUser(currentUser);
+        if (currentUser) {
+          await prepareSignedInUser(
+            currentUser,
+            authStatus === "google_connected" ? pick(locale, "تم تسجيل الدخول عبر Google.", "Google sign-in completed.") : undefined
+          );
+        }
+        if (authStatus) window.history.replaceState({}, "", "/auth");
       } catch {
-        if (active) setAuthMessage(pick(locale, "تعذر إكمال جلسة الدخول. جرّب Google مرة أخرى.", "Could not complete the auth session. Try Google again."));
+        if (active) setAuthMessage(pick(locale, "تعذر قراءة جلسة الدخول.", "Could not read the auth session."));
       } finally {
         if (active) setAuthBusy(false);
       }
@@ -173,7 +165,7 @@ export function AuthPage() {
     setAuthMessage(null);
     try {
       const supabase = createSupabaseBrowserClient();
-      const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${window.location.origin}/auth` } });
+      const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${window.location.origin}/auth/callback?next=/auth` } });
       if (error) throw error;
     } catch {
       setAuthBusy(false);
@@ -228,6 +220,7 @@ export function AuthPage() {
     </main>
   );
 }
+
 
 
 
