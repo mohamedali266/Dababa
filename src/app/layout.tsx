@@ -6,9 +6,14 @@ const cairo = Cairo({ subsets: ["arabic", "latin"], variable: "--font-arabic", d
 const sora = Sora({ subsets: ["latin"], variable: "--font-latin", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Dababa",
+  title: { default: "Dababa", template: "%s · Dababa" },
   description: "Arabic-first fitness training, nutrition, hydration, supplements, and progress tracking.",
-  manifest: "/manifest.webmanifest",
+  manifest: "/api/manifest.webmanifest",
+  icons: {
+    icon: "/api/branding/icon",
+    shortcut: "/api/branding/icon",
+    apple: "/api/branding/icon"
+  },
   appleWebApp: {
     capable: true,
     title: "Dababa",
@@ -48,3 +53,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+
+

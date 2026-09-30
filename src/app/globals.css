@@ -1650,3 +1650,107 @@ a {
   }
 }
 
+
+.admin-message,
+.admin-bootstrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-block-end: 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  padding: 12px 14px;
+  color: var(--text-primary);
+  background: color-mix(in oklab, var(--glass-fill-strong) 72%, transparent);
+  box-shadow: var(--shadow-glass);
+}
+
+.admin-message {
+  justify-content: flex-start;
+  color: var(--text-secondary);
+  font-weight: 800;
+}
+
+.admin-bootstrap strong,
+.admin-bootstrap span {
+  display: block;
+}
+
+.admin-bootstrap span {
+  margin-block-start: 4px;
+  color: var(--text-secondary);
+}
+
+.admin-form-card form {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-form-card label {
+  display: grid;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.admin-form-card input,
+.admin-form-card select {
+  min-height: 44px;
+  width: 100%;
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding-inline: 12px;
+  color: var(--text-primary);
+  background: color-mix(in oklab, var(--bg-deep) 46%, transparent);
+}
+
+.admin-form-card select option {
+  color: #0a1330;
+}
+
+.admin-form-card input[type="color"] {
+  min-height: 42px;
+  padding: 4px;
+}
+
+.brand-color-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.brand-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 10px;
+  color: var(--text-secondary);
+  background: var(--glass-fill);
+  font-weight: 850;
+}
+
+.brand-preview img {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+}
+
+.branding-card {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+  .admin-message,
+  .admin-bootstrap {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .brand-color-grid {
+    grid-template-columns: 1fr;
+  }
+}
