@@ -27,6 +27,10 @@ export function AuthPage() {
   const [assessmentDraftId, setAssessmentDraftId] = useState<string | null>(null);
   const [authMessage, setAuthMessage] = useState<string | null>(null);
   const [authBusy, setAuthBusy] = useState(false);
+  const [checkingAccess, setCheckingAccess] = useState(false);
+  const [needsAthleteCode, setNeedsAthleteCode] = useState(false);
+  const [athleteCode, setAthleteCode] = useState("");
+  const [codeBusy, setCodeBusy] = useState(false);
   const t = copy[locale];
   const isRtl = locale === "ar";
   const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
@@ -70,12 +74,35 @@ export function AuthPage() {
     let active = true;
     const supabase = createSupabaseBrowserClient();
 
+    async function refreshAccessState() {
+      setCheckingAccess(true);
+      try {
+        const [{ data: memberships, error: membershipsError }, { data: roles, error: rolesError }] = await Promise.all([
+          supabase.from("gym_memberships").select("id").eq("status", "active").limit(1),
+          supabase.from("user_roles").select("role").in("role", ["admin", "super_admin", "platform_admin", "gym_owner", "coach"])
+        ]);
+
+        if (membershipsError) throw membershipsError;
+        if (rolesError) throw rolesError;
+
+        const hasMembership = Boolean(memberships?.length);
+        const hasStaffRole = Boolean(roles?.length);
+        setNeedsAthleteCode(!hasMembership && !hasStaffRole);
+      } catch {
+        setNeedsAthleteCode(false);
+        setAuthMessage(pick(locale, "تم الدخول، لكن تعذر فحص عضوية النادي.", "Signed in, but gym access could not be checked."));
+      } finally {
+        setCheckingAccess(false);
+      }
+    }
+
     async function prepareSignedInUser(user: User, successMessage?: string) {
       if (!active) return;
       setUserEmail(user.email ?? null);
 
       try {
         await ensureUserWorkspace(user);
+        await refreshAccessState();
         if (active && successMessage) setAuthMessage(successMessage);
       } catch {
         if (active) setAuthMessage(pick(locale, "تم الدخول، لكن تعذر تجهيز ملفك.", "Signed in, but workspace setup failed."));
@@ -173,6 +200,26 @@ export function AuthPage() {
     }
   }
 
+  async function handleClaimAthleteCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setCodeBusy(true);
+    setAuthMessage(null);
+
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const normalizedCode = athleteCode.trim().replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+      const { error } = await supabase.rpc("claim_athlete_access_code", { raw_code: normalizedCode });
+      if (error) throw error;
+      setAthleteCode("");
+      setNeedsAthleteCode(false);
+      setAuthMessage(pick(locale, "تم ربط حسابك بالنادي. يمكنك الدخول للبرنامج الآن.", "Your account is linked to the gym. You can enter the app now."));
+    } catch {
+      setAuthMessage(pick(locale, "الكود غير صحيح أو تم استخدامه من قبل.", "The code is invalid or already used."));
+    } finally {
+      setCodeBusy(false);
+    }
+  }
+
   async function handleSignOut() {
     setAuthBusy(true);
     try {
@@ -181,6 +228,8 @@ export function AuthPage() {
       if (error) throw error;
       setUserEmail(null);
       setAssessmentDraftId(null);
+      setNeedsAthleteCode(false);
+      setAthleteCode("");
       setAuthMessage(pick(locale, "تم تسجيل الخروج.", "Signed out."));
     } catch {
       setAuthMessage(pick(locale, "تعذر تسجيل الخروج الآن.", "Could not sign out right now."));
@@ -200,7 +249,19 @@ export function AuthPage() {
 
         <GlassCard className="auth-panel">
           {userEmail ? (
-            <div className="auth-summary"><ShieldCheck size={32} /><p>{pick(locale, "الحساب متصل", "Account connected")}</p><strong>{userEmail}</strong><span>{assessmentDraftId ? pick(locale, "مسودة التقييم جاهزة", "Assessment draft ready") : pick(locale, "نجهز تقييمك الآن", "Preparing your assessment")}</span><div className="auth-actions"><Link className="primary-cta" href="/"><span>{pick(locale, "اذهب للتطبيق", "Go to app")}</span><b><ArrowIcon size={18} /></b></Link><button onClick={handleSignOut} type="button" disabled={authBusy}>{pick(locale, "خروج", "Sign out")}</button></div></div>
+            needsAthleteCode ? (
+              <form className="auth-form" onSubmit={handleClaimAthleteCode}>
+                <span className="eyebrow">{pick(locale, "كود اللاعب", "Athlete code")}</span>
+                <h2>{pick(locale, "اربط حسابك بناديك", "Link your account to your gym")}</h2>
+                <p>{pick(locale, "اطلب الكود الخاص بك من صاحب الجيم أو المدرب. ستحتاجه أول مرة فقط.", "Ask the gym owner or coach for your private code. You only need it once.")}</p>
+                <label><span>{pick(locale, "الكود", "Code")}</span><input autoCapitalize="characters" autoComplete="one-time-code" inputMode="text" required value={athleteCode} onChange={(event) => setAthleteCode(event.target.value.toUpperCase())} placeholder="DABABA2026" /></label>
+                <button className="auth-submit" disabled={codeBusy || checkingAccess} type="submit">{codeBusy ? <Loader2 className="spin" size={17} /> : null}{codeBusy ? pick(locale, "جار التحقق", "Checking") : pick(locale, "تأكيد الكود", "Confirm code")}</button>
+                {authMessage ? <span className="auth-message">{authMessage}</span> : null}
+                <button className="back-link" onClick={handleSignOut} type="button">{pick(locale, "تسجيل الخروج", "Sign out")}</button>
+              </form>
+            ) : (
+              <div className="auth-summary"><ShieldCheck size={32} /><p>{pick(locale, "الحساب متصل", "Account connected")}</p><strong>{userEmail}</strong><span>{checkingAccess ? pick(locale, "نفحص عضوية النادي", "Checking gym access") : assessmentDraftId ? pick(locale, "مسودة التقييم جاهزة", "Assessment draft ready") : pick(locale, "نجهز تقييمك الآن", "Preparing your assessment")}</span><div className="auth-actions"><Link className="primary-cta" href="/"><span>{pick(locale, "اذهب للتطبيق", "Go to app")}</span><b><ArrowIcon size={18} /></b></Link><button onClick={handleSignOut} type="button" disabled={authBusy}>{pick(locale, "خروج", "Sign out")}</button></div>{authMessage ? <span className="auth-message">{authMessage}</span> : null}</div>
+            )
           ) : (
             <form className="auth-form" onSubmit={handleAuthSubmit}>
               <span className="eyebrow">{pick(locale, "دخول دبابة", "Dababa auth")}</span>
@@ -220,6 +281,7 @@ export function AuthPage() {
     </main>
   );
 }
+
 
 
 

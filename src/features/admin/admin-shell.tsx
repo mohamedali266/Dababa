@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Activity, Bell, BrainCircuit, ChevronLeft, ChevronRight, Languages, Megaphone, Search, ShieldAlert, ShieldCheck, Users } from "lucide-react";
+import { Activity, BadgeCheck, Building2, ChevronLeft, ChevronRight, Dumbbell, KeyRound, Languages, Search, ShieldCheck, UserCog } from "lucide-react";
 import { GlassCard, IconButton } from "@/components/ui/primitives";
 import { adminStats } from "@/features/dashboard/mock-data";
 import { copy, type Locale } from "@/lib/translations";
@@ -10,16 +10,27 @@ import { copy, type Locale } from "@/lib/translations";
 
 const pick = (locale: Locale, ar: string, en: string) => (locale === "ar" ? ar : en);
 
-const users = [
-  { nameAr: "عمر عادل", nameEn: "Omar Adel", email: "omar@example.com", statusAr: "نشط", statusEn: "Active", role: "user", lastAr: "منذ 12 دقيقة", lastEn: "12 min ago" },
-  { nameAr: "سارة حسن", nameEn: "Sara Hassan", email: "sara@example.com", statusAr: "دعوة", statusEn: "Invited", role: "coach", lastAr: "أمس", lastEn: "Yesterday" },
-  { nameAr: "مروان علي", nameEn: "Marwan Ali", email: "marwan@example.com", statusAr: "موقوف", statusEn: "Paused", role: "user", lastAr: "قبل 8 أيام", lastEn: "8 days ago" }
+const gyms = [
+  { nameAr: "دبابة التجمع", nameEn: "Dababa New Cairo", owner: "owner@dababa.app", coaches: 6, athletes: 148, statusAr: "نشط", statusEn: "Active" },
+  { nameAr: "دبابة مدينة نصر", nameEn: "Dababa Nasr City", owner: "nasr-owner@dababa.app", coaches: 4, athletes: 91, statusAr: "تجهيز", statusEn: "Setup" }
+] as const;
+
+const staff = [
+  { nameAr: "محمود علي", nameEn: "Mahmoud Ali", email: "owner@dababa.app", roleAr: "صاحب جيم", roleEn: "Gym owner", clubAr: "دبابة التجمع", clubEn: "Dababa New Cairo" },
+  { nameAr: "سارة حسن", nameEn: "Sara Hassan", email: "sara@example.com", roleAr: "مدرب", roleEn: "Coach", clubAr: "دبابة التجمع", clubEn: "Dababa New Cairo" },
+  { nameAr: "أحمد فتحي", nameEn: "Ahmed Fathy", email: "coach@example.com", roleAr: "مدرب", roleEn: "Coach", clubAr: "دبابة مدينة نصر", clubEn: "Dababa Nasr City" }
+] as const;
+
+const athleteCodes = [
+  { athleteAr: "عمر عادل", athleteEn: "Omar Adel", code: "A7K92PZQ", statusAr: "تم التسليم", statusEn: "Shared", clubAr: "دبابة التجمع", clubEn: "Dababa New Cairo" },
+  { athleteAr: "مروان علي", athleteEn: "Marwan Ali", code: "M2Q8DABA", statusAr: "بانتظار التسجيل", statusEn: "Waiting", clubAr: "دبابة التجمع", clubEn: "Dababa New Cairo" },
+  { athleteAr: "ندى كريم", athleteEn: "Nada Karim", code: "N9GYM204", statusAr: "مستخدم", statusEn: "Claimed", clubAr: "دبابة مدينة نصر", clubEn: "Dababa Nasr City" }
 ] as const;
 
 const audits = [
-  { eventAr: "تحديث قالب إشعار الماء", eventEn: "Water reminder template updated", actor: "admin@dababa.app", time: "16:42" },
-  { eventAr: "فشل طلب AI بسبب الحصة", eventEn: "AI request failed on quota", actor: "system", time: "15:18" },
-  { eventAr: "تغيير حالة مستخدم", eventEn: "User status changed", actor: "ops@dababa.app", time: "12:05" }
+  { eventAr: "إنشاء كود لاعب جديد", eventEn: "Athlete code created", actor: "coach@example.com", time: "16:42" },
+  { eventAr: "إضافة مدرب للنادي", eventEn: "Coach added to gym", actor: "owner@dababa.app", time: "15:18" },
+  { eventAr: "تسجيل نادي جديد", eventEn: "New gym registered", actor: "admin@dababa.app", time: "12:05" }
 ] as const;
 
 export function AdminShell() {
@@ -39,13 +50,13 @@ export function AdminShell() {
         <aside className="admin-sidebar">
           <Link className="brand-row" href="/"><span className="brand-mark">D</span><strong>{t.appName}</strong></Link>
           <nav aria-label={pick(locale, "إدارة", "Admin")}>
-            {[ShieldCheck, Users, BrainCircuit, Bell, Megaphone, Activity].map((Icon, index) => <button className={index === 0 ? "active" : ""} key={index} type="button"><Icon size={18} /><span>{[pick(locale, "نظرة عامة", "Overview"), pick(locale, "المستخدمون", "Users"), "AI", pick(locale, "الإشعارات", "Notifications"), pick(locale, "البث", "Broadcasts"), pick(locale, "التدقيق", "Audit")][index]}</span></button>)}
+            {[ShieldCheck, Building2, UserCog, Dumbbell, KeyRound, Activity].map((Icon, index) => <button className={index === 0 ? "active" : ""} key={index} type="button"><Icon size={18} /><span>{[pick(locale, "نظرة عامة", "Overview"), pick(locale, "الأندية", "Gyms"), pick(locale, "المالكون والمدربون", "Owners & coaches"), pick(locale, "اللاعبون", "Athletes"), pick(locale, "الأكواد", "Codes"), pick(locale, "التدقيق", "Audit")][index]}</span></button>)}
           </nav>
         </aside>
 
         <section className="admin-main">
           <header className="admin-header">
-            <div><span className="live-badge warning"><i /> {pick(locale, "معاينة إدارة", "Admin preview")}</span><h1>{pick(locale, "لوحة تشغيل دبابة", "Dababa operations")}</h1><p>{pick(locale, "واجهة جاهزة للربط بفحص دور خادم لاحقا. البيانات الحالية نماذج تشغيلية فقط.", "Ready for a future server-side role check. Current data is operational mock data only.")}</p></div>
+            <div><span className="live-badge warning"><i /> {pick(locale, "معاينة إدارة", "Admin preview")}</span><h1>{pick(locale, "لوحة تشغيل دبابة", "Dababa operations")}</h1><p>{pick(locale, "إدارة أندية Dababa: الأدمن يسجل النادي والمالك، والمالك أو المدرب يصدر أكواد اللاعبين مرة واحدة.", "Manage Dababa gyms: admins create gyms and owners, then owners or coaches issue one-time athlete codes.")}</p></div>
             <div className="header-actions"><Link className="auth-link" href="/"><BackIcon size={16} />{pick(locale, "التطبيق", "App")}</Link><IconButton aria-label={t.language} onClick={() => setLocale((current) => current === "ar" ? "en" : "ar")}><Languages size={18} /></IconButton></div>
           </header>
 
@@ -55,18 +66,20 @@ export function AdminShell() {
 
           <div className="admin-workspace">
             <GlassCard className="admin-table-card">
-              <div className="section-heading"><span>{pick(locale, "إدارة المستخدمين", "User management")}</span><button type="button"><Search size={16} />{pick(locale, "بحث", "Search")}</button></div>
-              <div className="responsive-table"><table><thead><tr><th>{pick(locale, "الاسم", "Name")}</th><th>{pick(locale, "الحالة", "Status")}</th><th>{pick(locale, "الدور", "Role")}</th><th>{pick(locale, "آخر نشاط", "Last active")}</th><th>{pick(locale, "إجراء", "Action")}</th></tr></thead><tbody>{users.map((user) => <tr key={user.email}><td><strong>{pick(locale, user.nameAr, user.nameEn)}</strong><span>{user.email}</span></td><td><mark>{pick(locale, user.statusAr, user.statusEn)}</mark></td><td>{user.role}</td><td>{pick(locale, user.lastAr, user.lastEn)}</td><td><button type="button">{pick(locale, "مراجعة", "Review")}</button></td></tr>)}</tbody></table></div>
+              <div className="section-heading"><span>{pick(locale, "الأندية المسجلة", "Registered gyms")}</span><button type="button"><Search size={16} />{pick(locale, "بحث", "Search")}</button></div>
+              <div className="responsive-table"><table><thead><tr><th>{pick(locale, "النادي", "Gym")}</th><th>{pick(locale, "المالك", "Owner")}</th><th>{pick(locale, "مدربين", "Coaches")}</th><th>{pick(locale, "لاعبين", "Athletes")}</th><th>{pick(locale, "الحالة", "Status")}</th></tr></thead><tbody>{gyms.map((gym) => <tr key={gym.owner}><td><strong>{pick(locale, gym.nameAr, gym.nameEn)}</strong><span>{pick(locale, "نطاق نادي مستقل", "Tenant workspace")}</span></td><td>{gym.owner}</td><td>{gym.coaches}</td><td>{gym.athletes}</td><td><mark>{pick(locale, gym.statusAr, gym.statusEn)}</mark></td></tr>)}</tbody></table></div>
             </GlassCard>
 
-            <GlassCard className="ops-panel ai-panel"><div className="section-heading"><span>{pick(locale, "مراقبة الذكاء الاصطناعي", "AI monitoring")}</span><BrainCircuit size={18} /></div><dl><div><dt>{pick(locale, "استخدام الطلبات", "Request usage")}</dt><dd>38.4k / 50k</dd></div><div><dt>{pick(locale, "الإخفاقات", "Failures")}</dt><dd>2.1%</dd></div><div><dt>{pick(locale, "الحصة المتبقية", "Quota left")}</dt><dd>23%</dd></div></dl></GlassCard>
-            <GlassCard className="ops-panel broadcast-panel"><div className="section-heading"><span>{pick(locale, "بث الإشعارات", "Notification broadcast")}</span><Megaphone size={18} /></div><p>{pick(locale, "مسودة تستهدف مستخدمي خطة القوة الذين لم يكملوا شرب الماء اليوم.", "Draft targeting strength-plan users who have not completed today's water goal.")}</p><button className="install-cue" type="button">{pick(locale, "تحضير المسودة", "Prepare draft")}</button></GlassCard>
-            <GlassCard className="ops-panel audit-panel"><div className="section-heading"><span>{pick(locale, "سجل التدقيق", "Audit log")}</span><ShieldAlert size={18} /></div>{audits.map((audit) => <article key={audit.time}><strong>{pick(locale, audit.eventAr, audit.eventEn)}</strong><span>{audit.actor} · {audit.time}</span></article>)}</GlassCard>
+            <GlassCard className="ops-panel ai-panel"><div className="section-heading"><span>{pick(locale, "المالكون والمدربون", "Owners and coaches")}</span><UserCog size={18} /></div>{staff.map((member) => <article key={member.email}><strong>{pick(locale, member.nameAr, member.nameEn)}</strong><span>{pick(locale, member.roleAr, member.roleEn)} · {pick(locale, member.clubAr, member.clubEn)}</span></article>)}</GlassCard>
+            <GlassCard className="ops-panel broadcast-panel"><div className="section-heading"><span>{pick(locale, "أكواد اللاعبين", "Athlete codes")}</span><KeyRound size={18} /></div>{athleteCodes.map((item) => <article key={item.code}><strong>{pick(locale, item.athleteAr, item.athleteEn)} · {item.code}</strong><span>{pick(locale, item.statusAr, item.statusEn)} · {pick(locale, item.clubAr, item.clubEn)}</span></article>)}<button className="install-cue" type="button">{pick(locale, "إنشاء كود لاعب", "Create athlete code")}</button></GlassCard>
+            <GlassCard className="ops-panel audit-panel"><div className="section-heading"><span>{pick(locale, "سجل التدقيق", "Audit log")}</span><BadgeCheck size={18} /></div>{audits.map((audit) => <article key={audit.time}><strong>{pick(locale, audit.eventAr, audit.eventEn)}</strong><span>{audit.actor} · {audit.time}</span></article>)}</GlassCard>
           </div>
         </section>
       </div>
     </main>
   );
 }
+
+
 
 
