@@ -2099,3 +2099,216 @@ a {
   font-size: 0.84rem;
   font-weight: 850;
 }
+
+/* Security, data-driven dashboard, and calmer onboarding */
+.security-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-block: 14px;
+  border: 1px solid color-mix(in oklab, var(--danger) 46%, var(--glass-border));
+  border-radius: 18px;
+  padding: 12px 14px;
+  color: var(--text-primary);
+  background: color-mix(in oklab, var(--danger) 16%, var(--glass-fill-strong));
+  font-weight: 900;
+}
+
+.empty-state {
+  display: grid;
+  min-height: 240px;
+  place-items: center;
+  gap: 8px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.empty-state strong {
+  color: var(--text-primary);
+  font-size: 1.15rem;
+}
+
+.progress-ring {
+  grid-template-rows: auto auto;
+  align-content: center;
+  justify-items: center;
+  gap: 2px;
+}
+
+.progress-ring strong,
+.progress-ring span {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  text-align: center;
+}
+
+.progress-ring span {
+  max-width: 82px;
+  line-height: 1.1;
+}
+
+.auth-input-wrap:focus-within {
+  border-color: var(--glass-border);
+  background: color-mix(in oklab, var(--glass-fill-strong) 72%, transparent);
+  transform: none;
+}
+
+.auth-form .auth-input-wrap input:focus-visible,
+.auth-form select:focus-visible,
+.admin-form-card textarea:focus-visible {
+  outline: 0;
+}
+
+.auth-welcome-step,
+.auth-method-step {
+  min-height: 520px;
+  align-content: center;
+  gap: 16px;
+}
+
+.auth-welcome-step h2,
+.auth-method-step h2 {
+  margin: 0;
+  font-size: clamp(1.55rem, 4vw, 2.5rem);
+  line-height: 1.15;
+}
+
+.signup-method-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+
+.signup-method-grid button {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  min-height: 156px;
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 16px;
+  color: var(--text-primary);
+  background: color-mix(in oklab, var(--glass-fill-strong) 70%, transparent);
+  text-align: start;
+}
+
+.signup-method-grid button span:not(.google-dot) {
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.google-dot {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--cta-text);
+  background: var(--cta-bg);
+  font-family: var(--font-latin);
+  font-weight: 950;
+}
+
+.onboarding-step-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 10px 12px;
+  background: color-mix(in oklab, var(--glass-fill-strong) 62%, transparent);
+}
+
+.onboarding-step-head span,
+.compact-step-tabs span:last-child {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.onboarding-step-head strong {
+  color: var(--text-primary);
+}
+
+.compact-step-tabs {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.compact-step-tabs span:last-child {
+  padding-inline: 14px;
+}
+
+.wizard-step-card {
+  animation: wizard-in 220ms ease both;
+}
+
+@keyframes wizard-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.table-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.table-actions button {
+  display: inline-grid;
+  min-width: 38px;
+  place-items: center;
+}
+
+.table-actions .danger-action {
+  color: var(--text-primary);
+  background: color-mix(in oklab, var(--danger) 24%, var(--glass-fill));
+}
+
+.admin-form-card textarea {
+  min-height: 92px;
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 12px;
+  color: var(--text-primary);
+  background: color-mix(in oklab, var(--bg-deep) 46%, transparent);
+  font: inherit;
+}
+
+@media (max-width: 760px) {
+  .auth-route {
+    padding: 0;
+  }
+
+  .auth-layout,
+  .athlete-auth-layout,
+  .admin-login-layout {
+    min-height: 100dvh;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .auth-poster {
+    min-height: 220px;
+    border-radius: 0 0 28px 28px;
+  }
+
+  .auth-panel {
+    border-radius: 28px 28px 0 0;
+    margin-block-start: -18px;
+  }
+
+  .auth-welcome-step,
+  .auth-method-step {
+    min-height: auto;
+  }
+
+  .signup-method-grid {
+    grid-template-columns: 1fr;
+  }
+}

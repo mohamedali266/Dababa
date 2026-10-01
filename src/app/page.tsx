@@ -1,5 +1,10 @@
 import { DashboardShell } from "@/features/dashboard/dashboard-shell";
 
-export default function Home() {
-  return <DashboardShell />;
+type HomeProps = {
+  searchParams?: Promise<{ security?: string }>;
+};
+
+export default async function Home({ searchParams }: HomeProps) {
+  const params = await searchParams;
+  return <DashboardShell securityAlert={params?.security ?? null} />;
 }

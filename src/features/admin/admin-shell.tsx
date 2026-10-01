@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { Activity, BadgeCheck, Ban, Building2, ChevronLeft, ChevronRight, Dumbbell, KeyRound, Languages, Loader2, Palette, Plus, Search, ShieldCheck, UserCog } from "lucide-react";
+import { Activity, BadgeCheck, Ban, Building2, ChevronLeft, ChevronRight, Dumbbell, KeyRound, Languages, Loader2, Palette, Plus, Search, ShieldCheck, Trash2, UserCog } from "lucide-react";
 import { GlassCard, IconButton } from "@/components/ui/primitives";
 import { copy, type Locale } from "@/lib/translations";
 
@@ -11,13 +11,15 @@ type Branding = { appName: string; shortName: string; iconLetter: string; themeC
 type Gym = { id: string; name: string; slug: string; owner_email: string | null; status: string };
 type Membership = { id: string; gym_id: string; role: "owner" | "coach" | "athlete"; status: string };
 type AthleteCode = { id: string; gym_id: string; athlete_name: string; athlete_email: string | null; code: string; status: "unused" | "claimed" | "revoked"; claimed_at: string | null };
-type AdminSection = "overview" | "gyms" | "people" | "codes" | "branding" | "audit";
+type AccountUser = { id: string; email: string | null; display_name: string; roles: string[]; comment: string; created_at: string; last_sign_in_at: string | null };
+type AdminSection = "overview" | "gyms" | "people" | "accounts" | "codes" | "branding" | "audit";
 type OperationsPayload = {
   viewer: { email: string | null; isPlatformAdmin: boolean; staffGymIds: string[] };
   branding: Branding;
   gyms: Gym[];
   memberships: Membership[];
   athleteCodes: AthleteCode[];
+  accountUsers: AccountUser[];
 };
 
 const defaultBranding: Branding = {
@@ -48,6 +50,12 @@ export function AdminShell() {
   const [athleteName, setAthleteName] = useState("");
   const [athleteEmail, setAthleteEmail] = useState("");
   const [branding, setBranding] = useState<Branding>(defaultBranding);
+  const [accountEmail, setAccountEmail] = useState("");
+  const [accountPassword, setAccountPassword] = useState("");
+  const [accountName, setAccountName] = useState("");
+  const [accountRole, setAccountRole] = useState("user");
+  const [accountComment, setAccountComment] = useState("");
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const t = copy[locale];
   const isRtl = locale === "ar";
   const BackIcon = isRtl ? ChevronRight : ChevronLeft;
@@ -103,6 +111,7 @@ export function AdminShell() {
     { id: "overview", icon: ShieldCheck, ar: "نظرة عامة", en: "Overview" },
     { id: "gyms", icon: Building2, ar: "الأندية", en: "Gyms" },
     { id: "people", icon: UserCog, ar: "الفرق", en: "Teams" },
+    { id: "accounts", icon: UserCog, ar: "الحسابات", en: "Accounts" },
     { id: "codes", icon: KeyRound, ar: "الأكواد", en: "Codes" },
     { id: "branding", icon: Palette, ar: "البراندنج", en: "Branding" },
     { id: "audit", icon: BadgeCheck, ar: "السجل", en: "Audit" }
@@ -141,6 +150,37 @@ export function AdminShell() {
   async function handleBranding(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     await postAction({ action: "updateBranding", branding }, "branding");
+  }
+
+  async function handleCreateAccount(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const result = await postAction({ action: "createUser", email: accountEmail, password: accountPassword, displayName: accountName, role: accountRole, comment: accountComment }, "createUser");
+    if (result) { setAccountEmail(""); setAccountPassword(""); setAccountName(""); setAccountRole("user"); setAccountComment(""); }
+  }
+
+  async function handleUpdateAccount(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!selectedAccountId) return;
+    const payload: Record<string, unknown> = { action: "updateUser", userId: selectedAccountId, displayName: accountName, role: accountRole, comment: accountComment };
+    if (accountEmail) payload.email = accountEmail;
+    if (accountPassword) payload.password = accountPassword;
+    const result = await postAction(payload, "updateUser");
+    if (result) { setSelectedAccountId(null); setAccountEmail(""); setAccountPassword(""); setAccountName(""); setAccountRole("user"); setAccountComment(""); }
+  }
+
+  async function handleDeleteAccount(userId: string) {
+    if (!window.confirm(pick(locale, "حذف الحساب نهائيًا؟", "Delete this account permanently?"))) return;
+    await postAction({ action: "deleteUser", userId }, "deleteUser");
+  }
+
+  function editAccount(account: AccountUser) {
+    setSelectedAccountId(account.id);
+    setAccountEmail(account.email ?? "");
+    setAccountPassword("");
+    setAccountName(account.display_name);
+    setAccountRole(account.roles[0] ?? "user");
+    setAccountComment(account.comment ?? "");
+    setActiveSection("accounts");
   }
 
   if (accessDenied && !loading) {
@@ -184,6 +224,9 @@ export function AdminShell() {
           {activeSection === "gyms" ? <section className="admin-section admin-two-column wide-left"><GlassCard className="admin-table-card"><div className="section-heading"><span>{pick(locale, "الأندية المسجلة", "Registered gyms")}</span><Search size={16} /></div><div className="responsive-table"><table><thead><tr><th>{pick(locale, "النادي", "Gym")}</th><th>{pick(locale, "المالك", "Owner")}</th><th>{pick(locale, "الرابط", "Slug")}</th><th>{pick(locale, "الحالة", "Status")}</th></tr></thead><tbody>{(payload?.gyms ?? []).map((gym) => <tr key={gym.id}><td><strong>{gym.name}</strong><span>{gym.id.slice(0, 8)}</span></td><td>{gym.owner_email || pick(locale, "لم يحدد", "Not set")}</td><td>{gym.slug}</td><td><mark>{gym.status}</mark></td></tr>)}</tbody></table></div></GlassCard><GlassCard className="ops-panel admin-form-card"><div className="section-heading"><span>{pick(locale, "إنشاء نادي", "Create gym")}</span><Plus size={18} /></div><form onSubmit={handleCreateGym}><label><span>{pick(locale, "اسم النادي", "Gym name")}</span><input required value={gymName} onChange={(event) => { setGymName(event.target.value); if (!gymSlug) setGymSlug(slugify(event.target.value)); }} /></label><label><span>{pick(locale, "الرابط المختصر", "Slug")}</span><input required value={gymSlug} onChange={(event) => setGymSlug(slugify(event.target.value))} /></label><label><span>{pick(locale, "إيميل المالك", "Owner email")}</span><input inputMode="email" value={ownerEmail} onChange={(event) => setOwnerEmail(event.target.value)} /></label><button className="install-cue" disabled={busyAction === "createGym" || !payload?.viewer.isPlatformAdmin} type="submit">{pick(locale, "حفظ النادي", "Save gym")}</button></form></GlassCard></section> : null}
 
           {activeSection === "people" ? <section className="admin-section admin-two-column"><GlassCard className="ops-panel"><div className="section-heading"><span>{pick(locale, "المدربون والمالكون", "Owners and coaches")}</span><UserCog size={18} /></div>{(payload?.memberships ?? []).filter((item) => item.role !== "athlete").map((member) => <article key={member.id}><strong>{member.role}</strong><span>{member.status} · {gymById.get(member.gym_id)?.name ?? member.gym_id}</span></article>)}</GlassCard><GlassCard className="ops-panel"><div className="section-heading"><span>{pick(locale, "اللاعبون", "Athletes")}</span><Activity size={18} /></div>{athletes.map((member) => <article key={member.id}><strong>{pick(locale, "لاعب", "Athlete")}</strong><span>{member.status} · {gymById.get(member.gym_id)?.name ?? member.gym_id}</span></article>)}</GlassCard></section> : null}
+
+
+          {activeSection === "accounts" ? <section className="admin-section admin-two-column wide-left"><GlassCard className="admin-table-card"><div className="section-heading"><span>{pick(locale, "حسابات المستخدمين", "User accounts")}</span><UserCog size={18} /></div><div className="responsive-table"><table><thead><tr><th>{pick(locale, "المستخدم", "User")}</th><th>{pick(locale, "الدور", "Role")}</th><th>{pick(locale, "تعليق", "Comment")}</th><th>{pick(locale, "آخر دخول", "Last sign in")}</th><th>{pick(locale, "تحكم", "Actions")}</th></tr></thead><tbody>{(payload?.accountUsers ?? []).map((account) => <tr key={account.id}><td><strong>{account.display_name}</strong><span>{account.email ?? "-"}</span></td><td><mark>{account.roles[0] ?? "user"}</mark></td><td>{account.comment || "-"}</td><td>{account.last_sign_in_at ? new Date(account.last_sign_in_at).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US") : "-"}</td><td><div className="table-actions"><button onClick={() => editAccount(account)} type="button">{pick(locale, "تعديل", "Edit")}</button><button className="danger-action" onClick={() => handleDeleteAccount(account.id)} type="button"><Trash2 size={15} /></button></div></td></tr>)}</tbody></table></div></GlassCard><GlassCard className="ops-panel admin-form-card"><div className="section-heading"><span>{selectedAccountId ? pick(locale, "تعديل حساب", "Edit account") : pick(locale, "إضافة حساب", "Add account")}</span><Plus size={18} /></div><form onSubmit={selectedAccountId ? handleUpdateAccount : handleCreateAccount}><label><span>{pick(locale, "الاسم", "Name")}</span><input required value={accountName} onChange={(event) => setAccountName(event.target.value)} /></label><label><span>{pick(locale, "البريد", "Email")}</span><input inputMode="email" required value={accountEmail} onChange={(event) => setAccountEmail(event.target.value)} /></label><label><span>{pick(locale, selectedAccountId ? "كلمة مرور جديدة اختيارية" : "كلمة المرور", selectedAccountId ? "New password optional" : "Password")}</span><input minLength={6} required={!selectedAccountId} type="password" value={accountPassword} onChange={(event) => setAccountPassword(event.target.value)} /></label><label><span>{pick(locale, "الدور", "Role")}</span><select value={accountRole} onChange={(event) => setAccountRole(event.target.value)}><option value="user">user</option><option value="athlete">athlete</option><option value="coach">coach</option><option value="gym_owner">gym_owner</option><option value="platform_admin">platform_admin</option></select></label><label><span>{pick(locale, "تعليق إداري", "Admin comment")}</span><textarea value={accountComment} onChange={(event) => setAccountComment(event.target.value)} maxLength={500} /></label><button className="install-cue" disabled={busyAction === "createUser" || busyAction === "updateUser" || !payload?.viewer.isPlatformAdmin} type="submit">{selectedAccountId ? pick(locale, "حفظ التعديل", "Save changes") : pick(locale, "إنشاء الحساب", "Create account")}</button>{selectedAccountId ? <button className="secondary-cta" onClick={() => { setSelectedAccountId(null); setAccountEmail(""); setAccountPassword(""); setAccountName(""); setAccountRole("user"); setAccountComment(""); }} type="button">{pick(locale, "إلغاء", "Cancel")}</button> : null}</form></GlassCard></section> : null}
 
           {activeSection === "codes" ? <section className="admin-section admin-two-column wide-left"><GlassCard className="admin-table-card"><div className="section-heading"><span>{pick(locale, "أكواد اللاعبين", "Athlete codes")}</span><KeyRound size={18} /></div><div className="responsive-table"><table><thead><tr><th>{pick(locale, "اللاعب", "Athlete")}</th><th>{pick(locale, "الكود", "Code")}</th><th>{pick(locale, "النادي", "Gym")}</th><th>{pick(locale, "الحالة", "Status")}</th></tr></thead><tbody>{(payload?.athleteCodes ?? []).map((item) => <tr key={item.id}><td><strong>{item.athlete_name}</strong><span>{item.athlete_email || "-"}</span></td><td>{item.code}</td><td>{gymById.get(item.gym_id)?.name ?? "Gym"}</td><td><mark>{item.status}</mark></td></tr>)}</tbody></table></div></GlassCard><GlassCard className="ops-panel admin-form-card"><div className="section-heading"><span>{pick(locale, "إصدار كود", "Issue code")}</span><Plus size={18} /></div><form onSubmit={handleCreateAthleteCode}><label><span>{pick(locale, "النادي", "Gym")}</span><select required value={codeGymId} onChange={(event) => setCodeGymId(event.target.value)}>{(payload?.gyms ?? []).map((gym) => <option key={gym.id} value={gym.id}>{gym.name}</option>)}</select></label><label><span>{pick(locale, "اسم اللاعب", "Athlete name")}</span><input required value={athleteName} onChange={(event) => setAthleteName(event.target.value)} /></label><label><span>{pick(locale, "إيميل اللاعب اختياري", "Athlete email optional")}</span><input inputMode="email" value={athleteEmail} onChange={(event) => setAthleteEmail(event.target.value)} /></label><button className="install-cue" disabled={busyAction === "createCode" || !codeGymId} type="submit">{pick(locale, "إصدار الكود", "Issue code")}</button></form></GlassCard></section> : null}
 
