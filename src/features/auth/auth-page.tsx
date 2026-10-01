@@ -271,13 +271,21 @@ export function AuthPage() {
 
       if (!user) {
         const email = signup.email.trim().toLowerCase();
-        const result = await supabase.auth.signUp({ email, password: signup.password, options: { data: { display_name: signup.displayName.trim(), username: signup.username.trim() } } });
-        if (result.error) throw result.error;
-        user = result.data.session?.user ?? result.data.user ?? null;
-        if (!result.data.session) {
-          setAuthMessage(pick(locale, "راجع بريدك لتأكيد الحساب ثم سجل الدخول لإكمال ربط كود النادي.", "Check your email to confirm the account, then sign in to finish linking your gym code."));
-          return;
-        }
+        const signupResult = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            password: signup.password,
+            displayName: signup.displayName.trim(),
+            username: signup.username.trim()
+          })
+        });
+        if (!signupResult.ok) throw new Error("signup_failed");
+
+        const signinResult = await supabase.auth.signInWithPassword({ email, password: signup.password });
+        if (signinResult.error) throw signinResult.error;
+        user = signinResult.data.user ?? null;
       }
 
       if (!user) throw new Error("missing_user");
