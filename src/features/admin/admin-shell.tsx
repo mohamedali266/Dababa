@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { Activity, BadgeCheck, Building2, ChevronLeft, ChevronRight, Dumbbell, KeyRound, Languages, Loader2, Palette, Plus, Search, ShieldCheck, UserCog } from "lucide-react";
+import { Activity, BadgeCheck, Ban, Building2, ChevronLeft, ChevronRight, Dumbbell, KeyRound, Languages, Loader2, Palette, Plus, Search, ShieldCheck, UserCog } from "lucide-react";
 import { GlassCard, IconButton } from "@/components/ui/primitives";
 import { copy, type Locale } from "@/lib/translations";
 
@@ -40,6 +40,7 @@ export function AdminShell() {
   const [loading, setLoading] = useState(true);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [accessDenied, setAccessDenied] = useState(false);
   const [gymName, setGymName] = useState("");
   const [gymSlug, setGymSlug] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
@@ -61,14 +62,20 @@ export function AdminShell() {
     setMessage(null);
     try {
       const response = await fetch("/api/admin/operations", { cache: "no-store" });
+      if (response.status === 401 || response.status === 403) {
+        setAccessDenied(true);
+        setPayload(null);
+        return;
+      }
       if (!response.ok) throw new Error(await response.text());
       const data = await response.json() as OperationsPayload;
+      setAccessDenied(false);
       setPayload(data);
       setBranding(data.branding);
       if (!codeGymId && data.gyms[0]) setCodeGymId(data.gyms[0].id);
     } catch {
       setPayload(null);
-      setMessage(pick(locale, "سجل الدخول بحساب الأدمن لعرض لوحة التحكم.", "Sign in with the admin account to view operations."));
+      setMessage(pick(locale, "تعذر تحميل لوحة التحكم الآن.", "Could not load the admin console right now."));
     } finally {
       setLoading(false);
     }
@@ -136,6 +143,23 @@ export function AdminShell() {
     await postAction({ action: "updateBranding", branding }, "branding");
   }
 
+  if (accessDenied && !loading) {
+    return (
+      <main className="app-shell admin-route admin-denied-route">
+        <div className="admin-denied-card">
+          <span className="live-badge warning"><i /> {pick(locale, "منطقة محمية", "Protected area")}</span>
+          <Ban size={44} />
+          <h1>{pick(locale, "غير مصرح بدخول لوحة الإدارة", "Admin access denied")}</h1>
+          <p>{pick(locale, "هذه صفحة إدارة محمية. محاولة الدخول بدون صلاحية قد تؤدي إلى حظر الحساب أو الجهاز.", "This is a protected administration page. Unauthorized access attempts may lead to account or device restrictions.")}</p>
+          <div className="auth-actions">
+            <Link className="primary-cta" href="/admin/login"><span>{pick(locale, "دخول الأدمن", "Admin login")}</span><b><ShieldCheck size={18} /></b></Link>
+            <Link className="secondary-cta" href="/">{pick(locale, "العودة للتطبيق", "Back to app")}</Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="app-shell admin-route">
       <div className="admin-frame">
@@ -171,3 +195,4 @@ export function AdminShell() {
     </main>
   );
 }
+

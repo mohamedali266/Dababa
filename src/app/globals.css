@@ -1651,8 +1651,7 @@ a {
 }
 
 
-.admin-message,
-.admin-bootstrap {
+.admin-message {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1672,15 +1671,6 @@ a {
   font-weight: 800;
 }
 
-.admin-bootstrap strong,
-.admin-bootstrap span {
-  display: block;
-}
-
-.admin-bootstrap span {
-  margin-block-start: 4px;
-  color: var(--text-secondary);
-}
 
 .admin-form-card form {
   display: grid;
@@ -1744,8 +1734,7 @@ a {
 }
 
 @media (max-width: 640px) {
-  .admin-message,
-  .admin-bootstrap {
+  .admin-message {
     align-items: stretch;
     flex-direction: column;
   }
@@ -1847,4 +1836,255 @@ a {
 .auth-input-wrap button:hover {
   color: var(--text-primary);
   background: var(--glass-fill-strong);
+}
+
+/* Athlete onboarding and locked admin polish */
+.athlete-auth-layout,
+.admin-login-layout {
+  grid-template-columns: minmax(0, 0.92fr) minmax(420px, 1.08fr);
+}
+
+.athlete-auth-panel {
+  align-content: start;
+}
+
+.onboarding-form {
+  gap: 14px;
+}
+
+.signup-progress {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  padding: 12px;
+  background: color-mix(in oklab, var(--glass-fill-strong) 58%, transparent);
+}
+
+.signup-progress > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.signup-progress strong,
+.signup-progress span {
+  font-weight: 950;
+}
+
+.signup-progress span {
+  color: var(--accent-live);
+  font-variant-numeric: tabular-nums;
+}
+
+.signup-progress i {
+  position: relative;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--glass-border);
+}
+
+.signup-progress i::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: var(--w);
+  content: "";
+  background: linear-gradient(90deg, var(--accent-live), var(--brand-blue-glow));
+  transition: width 220ms ease;
+}
+
+.step-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.step-tabs span {
+  min-height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  padding-inline: 8px;
+  color: var(--text-muted);
+  background: var(--glass-fill);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.step-tabs span.active {
+  color: var(--text-primary);
+  background: color-mix(in oklab, var(--brand-blue) 34%, var(--glass-fill));
+}
+
+.two-col-fields,
+.three-col-fields {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.three-col-fields {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.auth-form select {
+  min-height: 50px;
+  width: 100%;
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding-inline: 12px;
+  color: var(--text-primary);
+  background: color-mix(in oklab, var(--glass-fill-strong) 72%, transparent);
+}
+
+.auth-form select option {
+  color: #0a1330;
+}
+
+.choice-card,
+.final-review {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 13px;
+  color: var(--text-primary);
+  background: color-mix(in oklab, var(--glass-fill-strong) 64%, transparent);
+  font-weight: 900;
+  text-align: start;
+}
+
+.choice-card.active {
+  border-color: color-mix(in oklab, var(--accent-live) 58%, var(--glass-border));
+  background: color-mix(in oklab, var(--accent-live) 18%, var(--glass-fill));
+}
+
+.wizard-actions {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.38fr) minmax(0, 1fr);
+  gap: 10px;
+}
+
+.wizard-actions .secondary-cta,
+.wizard-actions .auth-submit {
+  margin: 0;
+}
+
+.setup-loader,
+.success-summary,
+.admin-denied-card {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+
+.setup-loader {
+  min-height: 520px;
+  align-content: center;
+  gap: 18px;
+}
+
+.setup-loader h2,
+.admin-denied-card h1 {
+  margin: 0;
+  font-size: clamp(1.45rem, 4vw, 2.4rem);
+  line-height: 1.15;
+}
+
+.setup-loader p,
+.admin-denied-card p {
+  max-width: 58ch;
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.setup-timeline {
+  display: grid;
+  width: min(100%, 520px);
+  gap: 8px;
+}
+
+.setup-timeline span {
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 11px 12px;
+  color: var(--text-muted);
+  background: var(--glass-fill);
+  font-weight: 900;
+}
+
+.setup-timeline span.active {
+  color: var(--text-primary);
+  border-color: color-mix(in oklab, var(--accent-live) 48%, var(--glass-border));
+  background: color-mix(in oklab, var(--accent-live) 18%, var(--glass-fill));
+}
+
+.success-summary {
+  min-height: 480px;
+  align-content: center;
+  gap: 12px;
+}
+
+.success-summary svg,
+.admin-denied-card svg {
+  color: var(--accent-live);
+}
+
+.admin-denied-route {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 18px;
+}
+
+.admin-denied-card {
+  width: min(100%, 720px);
+  gap: 16px;
+  border: 1px solid var(--glass-border);
+  border-radius: 28px;
+  padding: clamp(20px, 5vw, 42px);
+  background: color-mix(in oklab, var(--glass-fill-strong) 76%, transparent);
+  box-shadow: var(--shadow-glass);
+  backdrop-filter: blur(20px) saturate(150%);
+}
+
+.admin-denied-card .auth-actions {
+  justify-content: center;
+}
+
+.admin-login-poster {
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--bg-deep) 20%, transparent), color-mix(in oklab, var(--bg-deep) 76%, transparent)),
+    url('/images/athletic-backdrop.png') center / cover;
+}
+
+.admin-login-panel {
+  align-content: center;
+}
+
+@media (max-width: 920px) {
+  .athlete-auth-layout,
+  .admin-login-layout,
+  .two-col-fields,
+  .three-col-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .step-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .wizard-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .step-tabs {
+    grid-template-columns: 1fr;
+  }
 }
