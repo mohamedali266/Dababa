@@ -24,6 +24,6 @@
 - No fake demo metrics before real data exists.
 
 ## Pending By Design
-- Pixel-faithful reproduction of `design-reference/*.html` is blocked because those files are not present in the repository.
+- Reference mockups are available in `design-reference/`, copied from the provided `style/` directory. Pixel-faithful reproduction remains pending as a UI implementation task.
 - Full replacement of the existing schema with the exact `update.json` data model would be destructive; current work extends existing tables safely.
 - Full pgTAP/Playwright coverage requires adding test harnesses and fixtures beyond the current project setup.

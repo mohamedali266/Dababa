@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>دبابة · تقييمك</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#EAF1FF;--bg2:#D3E2FF;--text:#0F1B3D;--muted:#5B6B8F;--glass:rgba(255,255,255,.55);--edge:rgba(255,255,255,.85);--shadow:rgba(40,80,170,.16);--field:rgba(255,255,255,.7);--blue:#2F6BFF;--cyan:#22B8E8;--chip:rgba(47,107,255,.1);--track:rgba(47,107,255,.15);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#0B1226;--bg2:#13204A;--text:#EEF3FF;--muted:#9AA9D1;--glass:rgba(255,255,255,.08);--edge:rgba(255,255,255,.18);--shadow:rgba(0,0,0,.35);--field:rgba(255,255,255,.08);--blue:#5B8CFF;--cyan:#4FD0F5;--chip:rgba(255,255,255,.1);--track:rgba(255,255,255,.14)}}
+:root[data-theme="dark"]{--bg1:#0B1226;--bg2:#13204A;--text:#EEF3FF;--muted:#9AA9D1;--glass:rgba(255,255,255,.08);--edge:rgba(255,255,255,.18);--shadow:rgba(0,0,0,.35);--field:rgba(255,255,255,.08);--blue:#5B8CFF;--cyan:#4FD0F5;--chip:rgba(255,255,255,.1);--track:rgba(255,255,255,.14)}
+*,*:before,*:after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;color:var(--text);font-family:"IBM Plex Sans Arabic",system-ui,sans-serif;background:linear-gradient(180deg,var(--bg1),var(--bg2)) fixed}
+body:before,body:after{content:"";position:fixed;border-radius:50%;filter:blur(60px);z-index:-1}
+body:before{width:280px;height:280px;background:var(--blue);top:-70px;inset-inline-end:-90px;opacity:.4}
+body:after{width:240px;height:240px;background:var(--cyan);bottom:60px;inset-inline-start:-90px;opacity:.35}
+.app{max-width:440px;margin:0 auto;padding:16px 20px 130px}
+button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.glass{background:var(--glass);border:1px solid var(--edge);border-radius:24px;backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);box-shadow:0 10px 30px var(--shadow),inset 0 1px 0 var(--edge)}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+.back{min-width:44px;min-height:44px;border-radius:50%;display:grid;place-items:center;font-size:18px}
+.prog{flex:1;height:8px;border-radius:8px;background:var(--track);overflow:hidden}
+.prog i{display:block;height:100%;width:0;border-radius:8px;background:linear-gradient(90deg,var(--blue),var(--cyan));transition:width .4s}
+.cnt{font-size:13px;color:var(--muted);min-width:34px;text-align:end}
+.step{display:none;animation:in .3s ease}.step.on{display:block}
+@keyframes in{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+h1{font-size:26px;line-height:1.4;margin:0 0 8px}
+.sub{color:var(--muted);font-size:15px;line-height:1.6;margin:0 0 22px}
+.opts{display:grid;gap:12px}
+.opt{display:flex;align-items:center;gap:14px;padding:16px;text-align:start;width:100%;min-height:68px;border:1.5px solid var(--edge);transition:border-color .2s,background .2s}
+.opt i{font-style:normal;font-size:24px;width:44px;height:44px;border-radius:14px;background:var(--chip);display:grid;place-items:center;flex:none}
+.opt b{display:block;font-size:16px}.opt span{font-size:13px;color:var(--muted)}
+.opt.sel{border-color:var(--blue);background:linear-gradient(180deg,rgba(47,107,255,.18),rgba(47,107,255,.08))}
+.opt .ck{margin-inline-start:auto;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--muted);flex:none;display:grid;place-items:center;font-size:13px;color:transparent}
+.opt.sel .ck{background:var(--blue);border-color:var(--blue);color:#fff}
+.seg{display:flex;background:var(--chip);border-radius:16px;padding:4px;margin-bottom:16px}
+.seg button{flex:1;min-height:46px;border-radius:12px;font-weight:500;color:var(--muted)}
+.seg .sel{background:var(--field);color:var(--text);font-weight:700;box-shadow:0 2px 8px var(--shadow)}
+.stp{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;margin-bottom:12px}
+.stp label{font-size:15px;color:var(--muted)}
+.stp .v{display:flex;align-items:center;gap:14px}
+.stp .v b{font-size:26px;min-width:64px;text-align:center}.stp .v small{font-size:12px;color:var(--muted);font-weight:400}
+.stp button{width:46px;height:46px;border-radius:50%;background:var(--chip);color:var(--blue);font-size:24px;font-weight:700}
+.stp button:active{transform:scale(.92)}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{min-height:48px;padding:0 18px;border-radius:24px;border:1.5px solid var(--edge);background:var(--field);font-weight:500}
+.chip.sel{border-color:var(--blue);background:var(--blue);color:#fff;font-weight:700}
+.lbl{font-size:14px;color:var(--muted);margin:20px 0 10px}
+.sum{padding:18px;margin-bottom:16px}
+.sum h3{margin:0 0 12px;font-size:15px;color:var(--muted);font-weight:500}
+.sum .chips span{background:var(--chip);border-radius:20px;padding:7px 12px;font-size:13px}
+.wait{display:flex;align-items:center;gap:14px;padding:18px}
+.pulse{width:14px;height:14px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 0 rgba(34,184,232,.6);animation:pl 1.6s infinite;flex:none;margin:0 8px}
+@keyframes pl{70%{box-shadow:0 0 0 16px rgba(34,184,232,0)}100%{box-shadow:0 0 0 0 rgba(34,184,232,0)}}
+.bar{position:fixed;z-index:5;inset-inline:0;bottom:0;padding:14px 20px calc(16px + env(safe-area-inset-bottom,0px))}
+.bar>div{max-width:440px;margin:0 auto}
+.next{width:100%;min-height:56px;border-radius:18px;color:#fff;font-weight:700;font-size:17px;background:linear-gradient(135deg,var(--blue),var(--cyan));box-shadow:0 12px 26px rgba(47,107,255,.35),inset 0 1px 0 rgba(255,255,255,.5);transition:opacity .2s}
+.next:disabled{opacity:.45;box-shadow:none}
+.skip{display:block;margin:6px auto 0;min-height:40px;color:var(--muted);font-size:14px}
+@media (prefers-reduced-motion:reduce){.step,.pulse,.prog i{animation:none;transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top" id="top">
+    <button class="back glass" id="bk" aria-label="رجوع">→</button>
+    <div class="prog"><i id="pg"></i></div>
+    <span class="cnt" id="ct"></span>
+  </div>
+
+  <section class="step on" data-k="goal">
+    <h1>إيه هدفك الأساسي؟</h1>
+    <p class="sub">هنبني خطتك على الهدف ده. تقدر تغيّره في أي وقت.</p>
+    <div class="opts" data-single>
+      <button class="opt glass" data-v="خسارة الدهون"><i>🔥</i><div><b>خسارة الدهون</b><span>نزول في الوزن مع الحفاظ على العضل</span></div><em class="ck">✓</em></button>
+      <button class="opt glass" data-v="بناء العضل"><i>💪</i><div><b>بناء العضل</b><span>زيادة الحجم والقوة</span></div><em class="ck">✓</em></button>
+      <button class="opt glass" data-v="لياقة عامة"><i>🏃</i><div><b>لياقة عامة</b><span>نشاط وطاقة وصحة أفضل</span></div><em class="ck">✓</em></button>
+      <button class="opt glass" data-v="قوة وأداء"><i>🏆</i><div><b>قوة وأداء</b><span>رفع أثقل وتحسين مستواك الرياضي</span></div><em class="ck">✓</em></button>
+    </div>
+  </section>
+
+  <section class="step" data-k="body" data-ok="1">
+    <h1>عرّفنا على جسمك</h1>
+    <p class="sub">بنحسب بيهم سعراتك واحتياج الماء.</p>
+    <div class="seg" data-gender><button class="sel" data-v="ذكر">ذكر</button><button data-v="أنثى">أنثى</button></div>
+    <div class="stp glass"><label>السن</label><div class="v"><button data-s="age" data-d="-1" aria-label="أقل">−</button><b id="age">٢٥</b><button data-s="age" data-d="1" aria-label="أكثر">+</button></div></div>
+    <div class="stp glass"><label>الطول</label><div class="v"><button data-s="h" data-d="-1" aria-label="أقل">−</button><b id="h">١٧٥ <small>سم</small></b><button data-s="h" data-d="1" aria-label="أكثر">+</button></div></div>
+    <div class="stp glass"><label>الوزن</label><div class="v"><button data-s="w" data-d="-1" aria-label="أقل">−</button><b id="w">٧٥ <small>كجم</small></b><button data-s="w" data-d="1" aria-label="أكثر">+</button></div></div>
+  </section>
+
+  <section class="step" data-k="level">
+    <h1>مستواك في التمرين؟</h1>
+    <p class="sub">علشان نختار لك شدة وتمارين مناسبة.</p>
+    <div class="opts" data-single>
+      <button class="opt glass" data-v="مبتدئ"><i>🌱</i><div><b>مبتدئ</b><span>أقل من ٦ شهور</span></div><em class="ck">✓</em></button>
+      <button class="opt glass" data-v="متوسط"><i>⚡</i><div><b>متوسط</b><span>من ٦ شهور لسنتين</span></div><em class="ck">✓</em></button>
+      <button class="opt glass" data-v="متقدم"><i>🚀</i><div><b>متقدم</b><span>أكتر من سنتين بانتظام</span></div><em class="ck">✓</em></button>
+    </div>
+  </section>
+
+  <section class="step" data-k="days">
+    <h1>تتمرن أنهي أيام؟</h1>
+    <p class="sub">اختار الأيام المناسبة لك، ٢ على الأقل.</p>
+    <div class="chips" data-multi data-min="2">
+      <button class="chip" data-v="السبت">السبت</button><button class="chip" data-v="الأحد">الأحد</button><button class="chip" data-v="الاثنين">الاثنين</button><button class="chip" data-v="الثلاثاء">الثلاثاء</button><button class="chip" data-v="الأربعاء">الأربعاء</button><button class="chip" data-v="الخميس">الخميس</button><button class="chip" data-v="الجمعة">الجمعة</button>
+    </div>
+    <div class="lbl">مكان التمرين</div>
+    <div class="seg" data-place><button class="sel" data-v="النادي">النادي</button><button data-v="البيت">البيت</button><button data-v="النادي والبيت">الاتنين</button></div>
+  </section>
+
+  <section class="step" data-k="inj" data-ok="1">
+    <h1>عندك إصابات أو ألم؟</h1>
+    <p class="sub">هنتجنب التمارين اللي ممكن تضايقك. اختياري.</p>
+    <div class="chips" data-multi data-none="لا يوجد">
+      <button class="chip" data-v="الظهر">الظهر</button><button class="chip" data-v="الركبة">الركبة</button><button class="chip" data-v="الكتف">الكتف</button><button class="chip" data-v="الرقبة">الرقبة</button><button class="chip" data-v="الرسغ">الرسغ</button><button class="chip" data-v="لا يوجد">لا يوجد</button>
+    </div>
+  </section>
+
+  <section class="step" data-k="done" data-ok="1">
+    <h1>تمام يا عمر، خلصنا 🎉</h1>
+    <p class="sub">دي ملخص بياناتك. تقدر تعدلها من الإعدادات.</p>
+    <div class="sum glass"><h3>ملخصك</h3><div class="chips" id="sum"></div></div>
+    <div class="wait glass"><i class="pulse"></i><div><b>كابتن أحمد بيجهز خطتك</b><div style="font-size:13px;color:var(--muted);margin-top:2px">هيوصلك إشعار أول ما تجهز، وغالبًا خلال ٢٤ ساعة.</div></div></div>
+  </section>
+</div>
+
+<div class="bar glass" style="border-radius:28px 28px 0 0;border-bottom:0"><div>
+  <button class="next" id="nx" disabled>التالي</button>
+  <button class="skip" id="sk">تخطي الآن</button>
+</div></div>
+
+<script>
+var steps=[].slice.call(document.querySelectorAll(".step")),i=0,A={age:25,h:175,w:75,gender:"ذكر",place:"النادي"};
+var ar=function(n){return String(n).replace(/\d/g,function(d){return "٠١٢٣٤٥٦٧٨٩"[d]})};
+var lim={age:[12,80],h:[120,220],w:[30,250]};
+function ok(){
+  var s=steps[i],k=s.dataset.k;
+  if(s.dataset.ok)return true;
+  if(k==="days")return (A.days||[]).length>=2;
+  return !!A[k];
+}
+function render(){
+  steps.forEach(function(s,n){s.classList.toggle("on",n===i)});
+  var last=i===steps.length-1,q=steps.length-1;
+  document.getElementById("pg").style.width=(last?100:i/q*100)+"%";
+  document.getElementById("ct").textContent=last?"":ar(i+1)+"/"+ar(q);
+  document.getElementById("bk").style.visibility=i&&!last?"visible":"hidden";
+  document.getElementById("sk").style.display=steps[i].dataset.k==="inj"||steps[i].dataset.k==="body"?"block":"none";
+  var nx=document.getElementById("nx");nx.textContent=last?"ادخل للتطبيق":"التالي";nx.disabled=!ok();
+  if(last){var c=[A.goal,A.level,ar(A.age)+" سنة",ar(A.h)+" سم",ar(A.w)+" كجم",ar((A.days||[]).length)+" أيام",A.place].concat(A.inj||[]);
+    document.getElementById("sum").innerHTML=c.filter(Boolean).map(function(x){return "<span>"+x+"</span>"}).join("")}
+}
+function go(d){i=Math.max(0,Math.min(steps.length-1,i+d));render();window.scrollTo(0,0)}
+document.getElementById("nx").onclick=function(){if(i<steps.length-1)go(1);else this.textContent="جاري الدخول…"};
+document.getElementById("sk").onclick=function(){go(1)};
+document.getElementById("bk").onclick=function(){go(-1)};
+document.querySelectorAll("[data-single]").forEach(function(g){g.onclick=function(e){var b=e.target.closest(".opt");if(!b)return;g.querySelectorAll(".opt").forEach(function(x){x.classList.remove("sel")});b.classList.add("sel");A[g.closest(".step").dataset.k]=b.dataset.v;render();if(navigator.vibrate)navigator.vibrate(8)}});
+document.querySelectorAll("[data-multi]").forEach(function(g){g.onclick=function(e){var b=e.target.closest(".chip");if(!b)return;var k=g.closest(".step").dataset.k==="inj"?"inj":"days",none=g.dataset.none;
+  if(none){if(b.dataset.v===none){g.querySelectorAll(".chip").forEach(function(x){x.classList.remove("sel")})}else{g.querySelectorAll(".chip").forEach(function(x){if(x.dataset.v===none)x.classList.remove("sel")})}}
+  b.classList.toggle("sel");A[k]=[].slice.call(g.querySelectorAll(".sel")).map(function(x){return x.dataset.v});render()}});
+document.querySelectorAll(".seg").forEach(function(g){g.onclick=function(e){var b=e.target.closest("button");if(!b)return;g.querySelectorAll("button").forEach(function(x){x.classList.remove("sel")});b.classList.add("sel");A[g.hasAttribute("data-gender")?"gender":"place"]=b.dataset.v}});
+document.querySelectorAll("[data-s]").forEach(function(b){var t;function step(){var k=b.dataset.s,v=A[k]+ +b.dataset.d;A[k]=Math.max(lim[k][0],Math.min(lim[k][1],v));var el=document.getElementById(k);el.firstChild.textContent=ar(A[k])+(k==="age"?"":" ")}
+  b.onclick=step});
+render();
+</script>
+</body>
+</html>

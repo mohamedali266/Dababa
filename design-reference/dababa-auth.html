@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>دبابة · الدخول</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#EAF1FF;--bg2:#D3E2FF;--text:#0F1B3D;--muted:#5B6B8F;--glass:rgba(255,255,255,.55);--edge:rgba(255,255,255,.85);--shadow:rgba(40,80,170,.16);--field:rgba(255,255,255,.7);--blue:#2F6BFF;--cyan:#22B8E8;--chip:rgba(47,107,255,.1);--err:#D93A4F;--ok:#12A36B;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#0B1226;--bg2:#13204A;--text:#EEF3FF;--muted:#9AA9D1;--glass:rgba(255,255,255,.08);--edge:rgba(255,255,255,.18);--shadow:rgba(0,0,0,.35);--field:rgba(255,255,255,.08);--blue:#5B8CFF;--cyan:#4FD0F5;--chip:rgba(255,255,255,.1);--err:#FF7A8A;--ok:#3DD598}}
+:root[data-theme="dark"]{--bg1:#0B1226;--bg2:#13204A;--text:#EEF3FF;--muted:#9AA9D1;--glass:rgba(255,255,255,.08);--edge:rgba(255,255,255,.18);--shadow:rgba(0,0,0,.35);--field:rgba(255,255,255,.08);--blue:#5B8CFF;--cyan:#4FD0F5;--chip:rgba(255,255,255,.1);--err:#FF7A8A;--ok:#3DD598}
+*,*:before,*:after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;color:var(--text);font-family:"IBM Plex Sans Arabic",system-ui,sans-serif;background:linear-gradient(180deg,var(--bg1),var(--bg2)) fixed}
+body:before,body:after{content:"";position:fixed;border-radius:50%;filter:blur(60px);z-index:-1}
+body:before{width:280px;height:280px;background:var(--blue);top:-70px;inset-inline-end:-90px;opacity:.4}
+body:after{width:240px;height:240px;background:var(--cyan);bottom:40px;inset-inline-start:-90px;opacity:.35}
+.app{max-width:440px;margin:0 auto;padding:28px 20px 40px}
+button,input{font:inherit;color:inherit}
+button{border:0;cursor:pointer;background:none}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.glass{background:var(--glass);border:1px solid var(--edge);border-radius:28px;backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);box-shadow:0 10px 30px var(--shadow),inset 0 1px 0 var(--edge)}
+.screen{display:none}.screen.on{display:block}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px}
+.logo i{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:grid;place-items:center;color:#fff;font-style:normal;box-shadow:0 8px 18px rgba(47,107,255,.35)}
+h1{font-size:28px;line-height:1.35;margin:34px 0 6px}
+.sub{color:var(--muted);font-size:15px;margin:0 0 24px;line-height:1.6}
+.panel{padding:20px}
+.seg{display:flex;background:var(--chip);border-radius:16px;padding:4px;margin-bottom:18px}
+.seg button{flex:1;min-height:44px;border-radius:12px;font-weight:500;color:var(--muted)}
+.seg .on{background:var(--field);color:var(--text);font-weight:700;box-shadow:0 2px 8px var(--shadow)}
+label{display:block;font-size:13px;color:var(--muted);margin:0 0 6px}
+.field{position:relative;margin-bottom:14px}
+input{width:100%;min-height:52px;border-radius:16px;border:1px solid var(--edge);background:var(--field);padding:0 16px;font-size:16px}
+input::placeholder{color:var(--muted);opacity:.7}
+input[dir=ltr]{text-align:right}
+.eye{position:absolute;inset-inline-start:6px;bottom:4px;min-height:44px;min-width:44px;color:var(--muted);font-size:13px}
+.primary{width:100%;min-height:54px;border-radius:18px;color:#fff;font-weight:700;font-size:17px;background:linear-gradient(135deg,var(--blue),var(--cyan));box-shadow:0 12px 26px rgba(47,107,255,.35),inset 0 1px 0 rgba(255,255,255,.5)}
+.primary:active{transform:scale(.98)}
+.google{width:100%;min-height:54px;border-radius:18px;background:var(--field);border:1px solid var(--edge);display:flex;align-items:center;justify-content:center;gap:10px;font-weight:700;margin-bottom:16px}
+.or{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px;margin:4px 0 16px}
+.or:before,.or:after{content:"";flex:1;height:1px;background:var(--edge)}
+.link{color:var(--blue);font-weight:700}
+.linkrow{text-align:center;margin-top:16px;font-size:14px;color:var(--muted)}
+.forgot{display:block;margin:-4px 0 16px;font-size:13px}
+.codebtn{width:100%;margin-top:14px;padding:16px;display:flex;align-items:center;gap:12px;text-align:start}
+.codebtn i{width:42px;height:42px;border-radius:14px;background:var(--chip);display:grid;place-items:center;font-style:normal;font-size:20px;flex:none}
+.codebtn b{display:block;font-size:15px}.codebtn span{font-size:13px;color:var(--muted)}
+.back{min-height:44px;color:var(--muted);font-size:15px;margin-bottom:6px}
+.code{text-align:center;font-size:24px;letter-spacing:4px;font-weight:700;text-transform:uppercase}
+.msg{min-height:22px;font-size:13px;margin:-4px 0 12px;color:var(--err)}
+.club{padding:18px;margin:6px 0 18px;display:none;animation:pop .3s ease}
+.club.show{display:block}
+.club .row{display:flex;align-items:center;gap:12px}
+.club .av{width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:grid;place-items:center;color:#fff;font-weight:700}
+.club small{color:var(--muted);display:block;font-size:13px}
+.badge{margin-inline-start:auto;color:var(--ok);font-size:13px;font-weight:700}
+.club hr{border:0;height:1px;background:var(--edge);margin:14px 0}
+.hint{font-size:12px;color:var(--muted);text-align:center;margin-top:14px}
+.skip{display:block;margin:14px auto 0;min-height:44px;color:var(--muted);font-size:14px}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.club{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- دخول / حساب جديد -->
+<section class="screen on" id="auth">
+  <div class="logo"><i>د</i>دبابة</div>
+  <h1 id="ttl">أهلًا بعودتك</h1>
+  <p class="sub" id="sb">سجّل دخولك وكمّل خطتك من حيث وقفت.</p>
+  <div class="glass panel">
+    <div class="seg" role="tablist">
+      <button class="on" id="t1" role="tab">دخول</button>
+      <button id="t2" role="tab">حساب جديد</button>
+    </div>
+    <button class="google"><svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20H42V20H24v8h11.3A12 12 0 1 1 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7A20 20 0 1 0 24 44c11 0 20-8 20-20 0-1.3-.1-2.7-.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8A12 12 0 0 1 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7A20 20 0 0 0 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2A12 12 0 0 1 12.700 28l-6.500 5C9.500 39.600 16.200 44 24 44z"/><path fill="#1976D2" d="M43.600 20H42H24v8h11.300a12 12 0 0 1-4.100 5.600l6.200 5.200C37 39.200 44 34 44 24c0-1.300-.1-2.700-.4-4z"/></svg>المتابعة بحساب جوجل</button>
+    <div class="or">أو بالإيميل</div>
+    <div class="field" id="nm" style="display:none"><label for="n">الاسم</label><input id="n" placeholder="اسمك كما يظهر لمدربك" autocomplete="name"></div>
+    <div class="field"><label for="e">الإيميل</label><input id="e" type="email" dir="ltr" placeholder="name@email.com" autocomplete="email"></div>
+    <div class="field"><label for="p">كلمة المرور</label><input id="p" type="password" dir="ltr" placeholder="٨ أحرف على الأقل" autocomplete="current-password"><button class="eye" id="eye" aria-label="إظهار كلمة المرور">إظهار</button></div>
+    <a class="link forgot" id="fg" href="#">نسيت كلمة المرور؟</a>
+    <button class="primary" id="go">دخول</button>
+  </div>
+  <button class="glass codebtn" id="tocode"><i>🏋️</i><div><b>عندك كود من ناديك؟</b><span>انضم لنادي مدربك وفعّل اشتراكك</span></div></button>
+  <p class="hint">بالمتابعة أنت توافق على الشروط وسياسة الخصوصية</p>
+</section>
+
+<!-- الانضمام بالكود -->
+<section class="screen" id="join">
+  <button class="back" id="bk">→ رجوع</button>
+  <h1>أدخل كود النادي</h1>
+  <p class="sub">الكود وصلك من النادي أو المدرب، وبيُستخدم مرة واحدة فقط.</p>
+  <div class="glass panel">
+    <label for="c">كود الانضمام</label>
+    <div class="field" style="margin-bottom:8px"><input id="c" class="code" dir="ltr" maxlength="9" placeholder="XXX-XXXXX" autocomplete="off" autocapitalize="characters"></div>
+    <div class="msg" id="m" role="alert"></div>
+    <div class="club glass" id="club">
+      <div class="row"><div class="av">ب</div><div><b>نادي بلاتينيوم فيت</b><small>المدرب: كابتن أحمد</small></div><span class="badge">✓ كود صالح</span></div>
+      <hr>
+      <div class="row" style="justify-content:space-between;font-size:14px"><span>الاشتراك</span><b>شهري · ينتهي بعد ٣٠ يوم من التفعيل</b></div>
+    </div>
+    <button class="primary" id="jb" disabled style="opacity:.5">أكمل الانضمام</button>
+  </div>
+  <p class="hint">جرّب الكود التجريبي: DBB-7K4M2</p>
+  <button class="skip" id="sk">ليس لدي كود · أكمل بشكل شخصي</button>
+</section>
+
+</div>
+<script>
+var $=function(i){return document.getElementById(i)},mode="in";
+function show(id){document.querySelectorAll(".screen").forEach(function(s){s.classList.toggle("on",s.id===id)});window.scrollTo(0,0)}
+function setMode(m){
+  mode=m;var up=m==="up";
+  $("t1").classList.toggle("on",!up);$("t2").classList.toggle("on",up);
+  $("nm").style.display=up?"block":"none";$("fg").style.display=up?"none":"block";
+  $("go").textContent=up?"إنشاء حساب":"دخول";
+  $("ttl").textContent=up?"ابدأ رحلتك":"أهلًا بعودتك";
+  $("sb").textContent=up?"أنشئ حسابك في دقيقة، وتقدر تضيف كود ناديك بعدها.":"سجّل دخولك وكمّل خطتك من حيث وقفت.";
+  $("p").autocomplete=up?"new-password":"current-password";
+}
+$("t1").onclick=function(){setMode("in")};$("t2").onclick=function(){setMode("up")};
+$("eye").onclick=function(){var s=$("p").type==="password";$("p").type=s?"text":"password";$("eye").textContent=s?"إخفاء":"إظهار"};
+$("tocode").onclick=function(){show("join");$("c").focus()};
+$("bk").onclick=function(){show("auth")};$("sk").onclick=function(){show("auth");setMode("up")};
+$("c").oninput=function(){
+  var v=this.value.toUpperCase().replace(/[^A-Z0-9]/g,"");
+  if(v.length>3)v=v.slice(0,3)+"-"+v.slice(3,8);
+  this.value=v;
+  var ok=v==="DBB-7K4M2",full=v.length===9;
+  $("club").classList.toggle("show",ok);
+  $("m").textContent=full&&!ok?"الكود غير صحيح أو مستخدم. راجع ناديك.":"";
+  $("jb").disabled=!ok;$("jb").style.opacity=ok?1:.5;
+};
+$("jb").onclick=function(){$("jb").textContent="تم الانضمام ✓"};
+</script>
+</body>
+</html>

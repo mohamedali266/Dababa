@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>دبابة · لوحة الإدارة</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#EAF1FF;--bg2:#D3E2FF;--text:#0F1B3D;--muted:#5B6B8F;--glass:rgba(255,255,255,.55);--edge:rgba(255,255,255,.85);--shadow:rgba(40,80,170,.16);--field:rgba(255,255,255,.7);--blue:#2F6BFF;--cyan:#22B8E8;--chip:rgba(47,107,255,.1);--track:rgba(47,107,255,.14);--ok:#0E9F6E;--warn:#C77700;--err:#D93A4F;--okb:rgba(14,159,110,.14);--warnb:rgba(245,158,11,.18);--errb:rgba(217,58,79,.14);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#0B1226;--bg2:#13204A;--text:#EEF3FF;--muted:#9AA9D1;--glass:rgba(255,255,255,.08);--edge:rgba(255,255,255,.18);--shadow:rgba(0,0,0,.35);--field:rgba(255,255,255,.08);--blue:#5B8CFF;--cyan:#4FD0F5;--chip:rgba(255,255,255,.1);--track:rgba(255,255,255,.14);--ok:#3DD598;--warn:#FFB84D;--err:#FF7A8A}}
+:root[data-theme="dark"]{--bg1:#0B1226;--bg2:#13204A;--text:#EEF3FF;--muted:#9AA9D1;--glass:rgba(255,255,255,.08);--edge:rgba(255,255,255,.18);--shadow:rgba(0,0,0,.35);--field:rgba(255,255,255,.08);--blue:#5B8CFF;--cyan:#4FD0F5;--chip:rgba(255,255,255,.1);--track:rgba(255,255,255,.14);--ok:#3DD598;--warn:#FFB84D;--err:#FF7A8A}
+*,*:before,*:after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;color:var(--text);font-family:"IBM Plex Sans Arabic",system-ui,sans-serif;background:linear-gradient(180deg,var(--bg1),var(--bg2)) fixed}
+body:before,body:after{content:"";position:fixed;border-radius:50%;filter:blur(60px);z-index:-1}
+body:before{width:280px;height:280px;background:var(--blue);top:-70px;inset-inline-end:-90px;opacity:.35}
+body:after{width:240px;height:240px;background:var(--cyan);bottom:100px;inset-inline-start:-90px;opacity:.35}
+.app{max-width:640px;margin:0 auto;padding:18px 18px 130px}
+button,input,select{font:inherit;color:inherit}
+button{border:0;cursor:pointer;background:none}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.glass{background:var(--glass);border:1px solid var(--edge);border-radius:24px;backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);box-shadow:0 10px 30px var(--shadow),inset 0 1px 0 var(--edge)}
+header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.lg{width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:grid;place-items:center;color:#fff;font-weight:700;flex:none;overflow:hidden}
+.lg img{width:100%;height:100%;object-fit:cover}
+header h1{font-size:19px;margin:0}header p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.tab{display:none}.tab.on{display:block;animation:in .25s ease}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{padding:16px}.stat small{font-size:13px;color:var(--muted)}.stat b{display:block;font-size:28px;margin-top:4px}
+.sec{display:flex;justify-content:space-between;align-items:center;margin:24px 0 12px}.sec h2{margin:0;font-size:17px}
+.add{min-height:44px;padding:0 18px;border-radius:22px;color:#fff;font-weight:700;font-size:14px;background:linear-gradient(135deg,var(--blue),var(--cyan));box-shadow:0 8px 18px rgba(47,107,255,.35)}
+.list{display:grid;gap:10px}
+.item{display:flex;align-items:center;gap:12px;padding:14px;width:100%;text-align:start}
+.pic{width:44px;height:44px;border-radius:50%;background:var(--chip);display:grid;place-items:center;font-weight:700;color:var(--blue);flex:none}
+.item .t{flex:1;min-width:0}.item b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.item .s{font-size:12px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{font-size:12px;font-weight:700;padding:5px 10px;border-radius:12px;white-space:nowrap}
+.b-ok{background:var(--okb);color:var(--ok)}.b-warn{background:var(--warnb);color:var(--warn)}.b-err{background:var(--errb);color:var(--err)}.b-wait{background:var(--chip);color:var(--muted)}
+.search{width:100%;min-height:50px;border-radius:16px;border:1px solid var(--edge);background:var(--field);padding:0 16px;font-size:16px;margin-bottom:12px}
+.chips{display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:42px;padding:0 16px;border-radius:21px;border:1.5px solid var(--edge);background:var(--field);font-weight:500;font-size:14px}
+.chip.sel{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
+.empty{text-align:center;color:var(--muted);padding:26px 0;font-size:14px}
+.rb{display:flex;align-items:center;gap:10px;font-size:13px;margin-bottom:10px}.rb span:first-child{width:56px;color:var(--muted)}.rb i{display:block;height:8px;border-radius:8px;background:linear-gradient(90deg,var(--blue),var(--cyan))}.rb .bg{flex:1;height:8px;border-radius:8px;background:var(--track)}
+.log{padding:6px 16px}.log div{padding:11px 0;border-bottom:1px solid var(--edge);font-size:14px;display:flex;justify-content:space-between;gap:10px}.log div:last-child{border:0}.log small{color:var(--muted);white-space:nowrap}
+.set{padding:18px;margin-bottom:14px}.set h3{margin:0 0 14px;font-size:16px}
+.srow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0}.srow small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.sw{width:52px;height:32px;border-radius:16px;background:var(--track);position:relative;flex:none;transition:background .2s}
+.sw:after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:inset-inline-start .2s}
+.sw[aria-checked=true]{background:var(--blue)}.sw[aria-checked=true]:after{inset-inline-start:23px}
+.logoedit{display:flex;align-items:center;gap:14px;margin-bottom:12px}.logoedit .lg{width:64px;height:64px;border-radius:20px;font-size:24px}
+.up{min-height:44px;padding:0 16px;border-radius:14px;background:var(--chip);color:var(--blue);font-weight:700;font-size:14px;display:inline-flex;align-items:center;cursor:pointer}
+.sw8{display:flex;gap:10px;margin-top:6px}.sw8 button{width:40px;height:40px;border-radius:50%;border:3px solid transparent}.sw8 .sel{border-color:var(--text)}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
+input,select{width:100%;min-height:50px;border-radius:14px;border:1px solid var(--edge);background:var(--field);padding:0 14px;font-size:16px}
+input[type=file]{display:none}
+.primary{width:100%;min-height:54px;border-radius:18px;color:#fff;font-weight:700;font-size:17px;margin-top:18px;background:linear-gradient(135deg,var(--blue),var(--cyan));box-shadow:0 12px 26px rgba(47,107,255,.35)}
+.primary:disabled{opacity:.45;box-shadow:none}
+.ghost{width:100%;min-height:50px;border-radius:16px;font-weight:700;color:var(--muted);margin-top:8px}
+.danger{width:100%;min-height:50px;border-radius:16px;font-weight:700;color:var(--err);background:var(--errb);margin-top:8px}
+.warnb{width:100%;min-height:50px;border-radius:16px;font-weight:700;color:var(--warn);background:var(--warnb);margin-top:8px}
+nav{position:fixed;z-index:5;inset-inline:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));max-width:608px;margin:0 auto;padding:6px;display:flex;border-radius:32px}
+.pill{position:absolute;top:6px;bottom:6px;border-radius:26px;background:linear-gradient(180deg,rgba(47,107,255,.2),rgba(47,107,255,.1));border:1px solid rgba(47,107,255,.25);transition:inset-inline-start .35s cubic-bezier(.3,1.3,.5,1),width .35s}
+nav button{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;color:var(--muted);min-height:54px;border-radius:26px}
+nav svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav .on{color:var(--blue);font-weight:700}
+.ov{position:fixed;inset:0;z-index:10;background:rgba(10,20,50,.45);display:none;align-items:flex-end}.ov.show{display:flex}
+.sheet{width:100%;max-width:560px;margin:0 auto;border-radius:30px 30px 0 0;padding:20px 20px calc(24px + env(safe-area-inset-bottom,0px));background:var(--bg1);border:1px solid var(--edge);animation:up .3s ease;max-height:92%;overflow:auto}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.sheet h3{margin:0 0 4px;font-size:20px}.sheet .sub{color:var(--muted);font-size:14px;margin:0 0 8px;line-height:1.6}
+.steps{display:flex;gap:6px;margin:10px 0 6px}.steps i{flex:1;height:5px;border-radius:5px;background:var(--track)}.steps i.on{background:var(--blue)}
+.toast{position:fixed;z-index:20;inset-inline:0;bottom:calc(96px + env(safe-area-inset-bottom,0px));margin:auto;width:max-content;max-width:88%;padding:12px 20px;border-radius:20px;background:var(--text);color:var(--bg1);font-size:14px;font-weight:500;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none}
+.toast.show{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.tab,.sheet,.pill,.sw,.sw:after,.toast{animation:none;transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header><div class="lg" id="hl">د</div><div><h1 id="hn">دبابة</h1><p>لوحة الإدارة العامة · /admin</p></div></header>
+
+  <section class="tab on" id="tab0">
+    <div class="stats" id="stats"></div>
+    <div class="sec"><h2>المستخدمين حسب الدور</h2></div>
+    <div class="glass" style="padding:16px" id="roles"></div>
+    <div class="sec"><h2>سجل العمليات</h2></div>
+    <div class="glass log" id="log"></div>
+  </section>
+
+  <section class="tab" id="tab1">
+    <div class="sec" style="margin-top:0"><h2>النوادي</h2><button class="add" id="addClub">＋ نادي جديد</button></div>
+    <div class="list" id="clubs"></div>
+  </section>
+
+  <section class="tab" id="tab2">
+    <div class="sec" style="margin-top:0"><h2>المستخدمين</h2><button class="add" id="addUser">＋ مستخدم</button></div>
+    <input class="search" id="q" type="search" placeholder="ابحث بالاسم أو الإيميل…" aria-label="بحث">
+    <div class="chips" id="rf"><button class="chip sel" data-r="all">الكل</button><button class="chip" data-r="admin">أدمن</button><button class="chip" data-r="owner">أونر</button><button class="chip" data-r="trainer">مدرب</button><button class="chip" data-r="player">لاعب</button></div>
+    <div class="list" id="users"></div>
+  </section>
+
+  <section class="tab" id="tab3">
+    <div class="set glass"><h3>هوية الموقع</h3>
+      <div class="logoedit"><div class="lg" id="sl">د</div><div><label class="up" for="lf" style="margin:0">تغيير اللوجو</label><input type="file" id="lf" accept="image/*"><div style="font-size:12px;color:var(--muted);margin-top:6px">PNG أو SVG · مربع · حتى ١ ميجا</div><button id="lr" style="color:var(--err);font-size:13px;min-height:36px;display:none">إزالة اللوجو</button></div></div>
+      <label for="sn">اسم الموقع</label><input id="sn" value="دبابة">
+      <label>اللون الأساسي</label><div class="sw8" id="cols"></div>
+    </div>
+    <div class="set glass"><h3>التسجيل والدخول</h3>
+      <div class="srow"><div>تسجيل الدخول بجوجل<small>ظهور الزر في شاشة الدخول</small></div><button class="sw" role="switch" aria-checked="true" data-k="google" aria-label="جوجل"></button></div>
+      <div class="srow"><div>السماح بالتسجيل الشخصي<small>بدون كود نادي</small></div><button class="sw" role="switch" aria-checked="true" data-k="personal" aria-label="تسجيل شخصي"></button></div>
+      <label for="ex">صلاحية كود الانضمام (أيام)</label><select id="ex"><option>٣</option><option selected>٧</option><option>١٤</option><option>٣٠</option></select>
+    </div>
+    <div class="set glass"><h3>النظام</h3>
+      <div class="srow"><div>وضع الصيانة<small>يمنع دخول كل المستخدمين عدا الأدمن</small></div><button class="sw" role="switch" aria-checked="false" data-k="maint" aria-label="وضع الصيانة"></button></div>
+      <div class="srow"><div>إشعارات انتهاء الاشتراك<small>قبل الانتهاء بـ ٣ أيام</small></div><button class="sw" role="switch" aria-checked="true" data-k="notif" aria-label="إشعارات"></button></div>
+    </div>
+    <button class="primary" id="save">حفظ الإعدادات</button>
+  </section>
+</div>
+
+<nav class="glass" id="nav" aria-label="التنقل">
+  <span class="pill" id="pill"></span>
+  <button class="on"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>نظرة عامة</button>
+  <button><svg viewBox="0 0 24 24"><path d="M3 21V8l9-5 9 5v13M9 21v-6h6v6"/></svg>النوادي</button>
+  <button><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.500"/><path d="M2.500 20c0-3.500 3-5.500 6.500-5.500S15.500 16.500 15.500 20M16 4.500a3.500 3.500 0 0 1 0 7M18 15c2 .6 3.500 2.300 3.500 5"/></svg>المستخدمين</button>
+  <button><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.400 15a1.700 1.700 0 0 0 .3 1.800l.1.1a2 2 0 1 1-2.800 2.800l-.1-.1a1.700 1.700 0 0 0-1.800-.3 1.700 1.700 0 0 0-1 1.500V21a2 2 0 1 1-4 0v-.1a1.700 1.700 0 0 0-1-1.500 1.700 1.700 0 0 0-1.800.3l-.1.100a2 2 0 1 1-2.800-2.800l.1-.1a1.700 1.700 0 0 0 .3-1.800 1.700 1.700 0 0 0-1.500-1H3a2 2 0 1 1 0-4h.1a1.700 1.700 0 0 0 1.500-1 1.700 1.700 0 0 0-.3-1.800l-.1-.1a2 2 0 1 1 2.800-2.800l.1.100a1.700 1.700 0 0 0 1.800.3h0a1.700 1.700 0 0 0 1-1.500V3a2 2 0 1 1 4 0v.1a1.700 1.700 0 0 0 1 1.500h0a1.700 1.700 0 0 0 1.800-.3l.1-.1a2 2 0 1 1 2.800 2.800l-.1.100a1.700 1.700 0 0 0-.3 1.800v0a1.700 1.700 0 0 0 1.500 1H21a2 2 0 1 1 0 4h-.1a1.700 1.700 0 0 0-1.500 1z"/></svg>الإعدادات</button>
+</nav>
+<div class="ov" id="ov"><div class="sheet" id="sh"></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+var $=function(i){return document.getElementById(i)};
+var ar=function(n){return String(n).replace(/\d/g,function(d){return "٠١٢٣٤٥٦٧٨٩"[d]})};
+var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
+var RL={admin:"أدمن",owner:"أونر",trainer:"مدرب",player:"لاعب"},PL={basic:"أساسي",pro:"احترافي",ent:"مؤسسات"},ST={active:["نشط","b-ok"],suspended:["موقوف","b-err"],invited:["بانتظار الدعوة","b-wait"]};
+var C=[{id:1,name:"بلاتينيوم فيت",city:"القاهرة",plan:"pro",status:"active"},{id:2,name:"أيرون جيم",city:"الإسكندرية",plan:"basic",status:"active"},{id:3,name:"فيت زون",city:"المنصورة",plan:"basic",status:"suspended"}];
+var U=[{id:1,name:"عمر (أنت)",email:"omar@dababa.app",role:"admin",club:0,status:"active"},{id:2,name:"محمود السيد",email:"mahmoud@platinum.com",role:"owner",club:1,status:"active"},{id:3,name:"كابتن أحمد",email:"ahmed@platinum.com",role:"trainer",club:1,status:"active"},{id:4,name:"كابتن منى",email:"mona@platinum.com",role:"trainer",club:1,status:"active"},{id:5,name:"هشام فاروق",email:"hisham@iron.com",role:"owner",club:2,status:"active"},{id:6,name:"يوسف حسن",email:"youssef@mail.com",role:"player",club:1,status:"active"},{id:7,name:"سارة إبراهيم",email:"sara@mail.com",role:"player",club:1,status:"suspended"},{id:8,name:"كريم سمير",email:"karim@mail.com",role:"player",club:0,status:"active"}];
+var L=[["إنشاء نادي «أيرون جيم»","منذ ساعتين"],["إيقاف المستخدم سارة إبراهيم","أمس"],["تعديل دور كابتن منى إلى مدرب","أمس"]];
+var nid=100,rf="all",cfg={google:true,personal:true,maint:false,notif:true},logo=null,color="#2F6BFF";
+function cn(id){var c=C.filter(function(x){return x.id===id})[0];return c?c.name:"بدون نادي"}
+function log(t){L.unshift([t,"الآن"]);L=L.slice(0,6)}
+function toast(t){var e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(function(){e.classList.remove("show")},2200)}
+function open(h){$("sh").innerHTML=h;$("ov").classList.add("show")}
+function close(){$("ov").classList.remove("show")}
+$("ov").onclick=function(e){if(e.target===$("ov"))close()};
+function confirmBox(title,txt,btn,fn){open('<h3>'+title+'</h3><p class="sub">'+txt+'</p><button class="danger" id="yes">'+btn+'</button><button class="ghost" id="no">تراجع</button>');$("no").onclick=close;$("yes").onclick=function(){close();fn()}}
+function render(){
+  var act=U.filter(function(u){return u.status==="active"}).length;
+  $("stats").innerHTML=[["النوادي",C.length],["المستخدمين",U.length],["نشطين",act],["موقوفين",U.filter(function(u){return u.status==="suspended"}).length]].map(function(s){return '<div class="stat glass"><small>'+s[0]+'</small><b>'+ar(s[1])+'</b></div>'}).join("");
+  $("roles").innerHTML=Object.keys(RL).map(function(r){var n=U.filter(function(u){return u.role===r}).length;return '<div class="rb"><span>'+RL[r]+'</span><div class="bg"><i style="width:'+(U.length?n/U.length*100:0)+'%"></i></div><b>'+ar(n)+'</b></div>'}).join("");
+  $("log").innerHTML=L.map(function(l){return '<div><span>'+esc(l[0])+'</span><small>'+l[1]+'</small></div>'}).join("");
+  $("clubs").innerHTML=C.length?C.map(function(c){var o=U.filter(function(u){return u.club===c.id&&u.role==="owner"})[0],n=U.filter(function(u){return u.club===c.id}).length;
+    return '<button class="item glass" data-c="'+c.id+'"><div class="pic">'+esc(c.name[0])+'</div><div class="t"><b>'+esc(c.name)+'</b><span class="s">'+esc(c.city)+' · '+PL[c.plan]+' · '+ar(n)+' مستخدم · '+(o?'الأونر: '+esc(o.name):'بدون أونر')+'</span></div><span class="badge '+(c.status==="active"?"b-ok":"b-err")+'">'+(c.status==="active"?"نشط":"موقوف")+'</span></button>'}).join(""):'<div class="empty">لا توجد نوادي بعد</div>';
+  var q=$("q").value.trim().toLowerCase(),r=U.filter(function(u){return (rf==="all"||u.role===rf)&&(u.name.toLowerCase().indexOf(q)>-1||u.email.indexOf(q)>-1)});
+  $("users").innerHTML=r.length?r.map(function(u){return '<button class="item glass" data-u="'+u.id+'"><div class="pic">'+esc(u.name[0])+'</div><div class="t"><b>'+esc(u.name)+'</b><span class="s">'+RL[u.role]+' · '+esc(cn(u.club))+' · '+esc(u.email)+'</span></div><span class="badge '+ST[u.status][1]+'">'+ST[u.status][0]+'</span></button>'}).join(""):'<div class="empty">لا نتائج مطابقة</div>';
+}
+$("q").oninput=render;
+$("rf").onclick=function(e){var b=e.target.closest(".chip");if(!b)return;rf=b.dataset.r;[].forEach.call($("rf").children,function(x){x.classList.toggle("sel",x===b)});render()};
+$("users").onclick=function(e){var b=e.target.closest("[data-u]");if(b)userSheet(+b.dataset.u)};
+$("clubs").onclick=function(e){var b=e.target.closest("[data-c]");if(b)clubSheet(+b.dataset.c)};
+$("addUser").onclick=function(){userSheet(0)};$("addClub").onclick=function(){clubSheet(0)};
+function clubOpts(sel){return '<option value="0">بدون نادي</option>'+C.map(function(c){return '<option value="'+c.id+'"'+(c.id===sel?' selected':'')+'>'+esc(c.name)+'</option>'}).join("")}
+function roleOpts(sel){return Object.keys(RL).map(function(r){return '<option value="'+r+'"'+(r===sel?' selected':'')+'>'+RL[r]+'</option>'}).join("")}
+function userSheet(id){
+  var u=id?U.filter(function(x){return x.id===id})[0]:{name:"",email:"",role:"player",club:0,status:"invited"},me=id===1;
+  open('<h3>'+(id?'تعديل مستخدم':'إضافة مستخدم')+'</h3><p class="sub">'+(id?'':'هيوصله لينك دعوة على الإيميل ليضبط كلمة المرور.')+'</p><label for="un">الاسم</label><input id="un" value="'+esc(u.name)+'"><label for="ue">الإيميل</label><input id="ue" type="email" dir="ltr" value="'+esc(u.email)+'"><label for="ur">الدور</label><select id="ur"'+(me?' disabled':'')+'>'+roleOpts(u.role)+'</select><label for="uc">النادي</label><select id="uc">'+clubOpts(u.club)+'</select><div id="er" role="alert" style="color:var(--err);font-size:13px;min-height:20px;margin-top:6px"></div><button class="primary" id="sv" style="margin-top:6px">'+(id?'حفظ التعديلات':'إرسال الدعوة')+'</button>'+(id&&!me?'<button class="warnb" id="sp">'+(u.status==="suspended"?'إعادة تفعيل الحساب':'إيقاف الحساب')+'</button><button class="danger" id="dl">حذف المستخدم</button>':'')+'<button class="ghost" id="cn">إغلاق</button>');
+  $("cn").onclick=close;
+  $("sv").onclick=function(){
+    var n=$("un").value.trim(),m=$("ue").value.trim(),r=$("ur").value,c=+$("uc").value;
+    if(!n||!/^\S+@\S+\.\S+$/.test(m)){$("er").textContent="اكتب الاسم وإيميل صحيح.";return}
+    if((r==="owner"||r==="trainer")&&!c){$("er").textContent="الأونر والمدرب لازم يتربطوا بنادي.";return}
+    if(r==="owner"&&U.some(function(x){return x.role==="owner"&&x.club===c&&x.id!==id})){$("er").textContent="النادي ده له أونر بالفعل.";return}
+    if(r==="admin")c=0;
+    if(id){u.name=n;u.email=m;u.role=r;u.club=c;log("تعديل المستخدم "+n)}else{U.push({id:++nid,name:n,email:m,role:r,club:c,status:"invited"});log("دعوة "+n+" بدور "+RL[r])}
+    close();render();toast(id?"تم حفظ التعديلات":"تم إرسال الدعوة")};
+  if(id&&!me){
+    $("sp").onclick=function(){var s=u.status==="suspended";u.status=s?"active":"suspended";log((s?"تفعيل ":"إيقاف ")+u.name);close();render();toast(s?"تم التفعيل":"تم الإيقاف")};
+    $("dl").onclick=function(){confirmBox("حذف «"+esc(u.name)+"»؟","هيتحذف الحساب وعضوياته نهائيًا ولا يمكن التراجع.","نعم، احذف",function(){U=U.filter(function(x){return x.id!==id});log("حذف المستخدم "+u.name);render();toast("تم الحذف")})};
+  }
+}
+function clubSheet(id){
+  var c=id?C.filter(function(x){return x.id===id})[0]:null;
+  if(!c)return clubNew({});
+  var o=U.filter(function(u){return u.club===id&&u.role==="owner"})[0];
+  open('<h3>'+esc(c.name)+'</h3><p class="sub">'+(o?'الأونر: '+esc(o.name):'هذا النادي بلا أونر.')+'</p><label for="cm">اسم النادي</label><input id="cm" value="'+esc(c.name)+'"><label for="cy">المدينة</label><input id="cy" value="'+esc(c.city)+'"><label for="cp">الباقة</label><select id="cp">'+Object.keys(PL).map(function(k){return '<option value="'+k+'"'+(k===c.plan?' selected':'')+'>'+PL[k]+'</option>'}).join("")+'</select><button class="primary" id="sv">حفظ التعديلات</button>'+(o?'':'<button class="warnb" id="ao">إضافة أونر للنادي</button>')+'<button class="warnb" id="sp">'+(c.status==="active"?'إيقاف النادي':'إعادة تفعيل النادي')+'</button><button class="danger" id="dl">حذف النادي</button><button class="ghost" id="cn">إغلاق</button>');
+  $("cn").onclick=close;
+  $("sv").onclick=function(){var n=$("cm").value.trim();if(!n)return;c.name=n;c.city=$("cy").value.trim();c.plan=$("cp").value;log("تعديل النادي "+n);close();render();toast("تم الحفظ")};
+  if($("ao"))$("ao").onclick=function(){ownerSheet(c.id,c.name)};
+  $("sp").onclick=function(){var a=c.status==="active";c.status=a?"suspended":"active";log((a?"إيقاف ":"تفعيل ")+"النادي "+c.name);close();render();toast(a?"تم إيقاف النادي":"تم التفعيل")};
+  $("dl").onclick=function(){var n=U.filter(function(u){return u.club===id}).length;confirmBox("حذف «"+esc(c.name)+"»؟","هيتحذف النادي، وهيتفك ارتباط "+ar(n)+" مستخدم بيه (اللاعبين يفضلوا بحساب شخصي).","نعم، احذف النادي",function(){U.forEach(function(u){if(u.club===id)u.club=0});C=C.filter(function(x){return x.id!==id});log("حذف النادي "+c.name);render();toast("تم حذف النادي")})};
+}
+function clubNew(d){
+  open('<h3>نادي جديد</h3><p class="sub">الخطوة ١ من ٢ · بيانات النادي</p><div class="steps"><i class="on"></i><i></i></div><label for="cm">اسم النادي</label><input id="cm" value="'+esc(d.name||"")+'" placeholder="مثال: بلاتينيوم فيت"><label for="cy">المدينة</label><input id="cy" value="'+esc(d.city||"")+'"><label for="cp">الباقة</label><select id="cp"><option value="basic">أساسي</option><option value="pro">احترافي</option><option value="ent">مؤسسات</option></select><button class="primary" id="nx" disabled>التالي: إنشاء الأونر</button><button class="ghost" id="cn">إلغاء</button>');
+  $("cn").onclick=close;var chk=function(){$("nx").disabled=!$("cm").value.trim()};$("cm").oninput=chk;chk();
+  $("nx").onclick=function(){var c={id:++nid,name:$("cm").value.trim(),city:$("cy").value.trim()||"—",plan:$("cp").value,status:"active"};ownerSheet(c.id,c.name,c)};
+}
+function ownerSheet(cid,cname,pending){
+  open('<h3>أونر «'+esc(cname)+'»</h3><p class="sub">'+(pending?'الخطوة ٢ من ٢ · ':'')+'هيوصله لينك دعوة يفعّل بيه حسابه ويدير النادي.</p>'+(pending?'<div class="steps"><i class="on"></i><i class="on"></i></div>':'')+'<label for="on">اسم الأونر</label><input id="on"><label for="oe">الإيميل</label><input id="oe" type="email" dir="ltr" placeholder="owner@email.com"><div id="er" role="alert" style="color:var(--err);font-size:13px;min-height:20px;margin-top:6px"></div><button class="primary" id="mk" style="margin-top:6px">'+(pending?'إنشاء النادي وإرسال الدعوة':'إرسال الدعوة')+'</button><button class="ghost" id="cn">'+(pending?'رجوع':'إلغاء')+'</button>');
+  $("cn").onclick=function(){pending?clubNew(pending):close()};
+  $("mk").onclick=function(){var n=$("on").value.trim(),m=$("oe").value.trim();if(!n||!/^\S+@\S+\.\S+$/.test(m)){$("er").textContent="اكتب اسم الأونر وإيميل صحيح.";return}
+    if(pending){C.push(pending);log("إنشاء نادي «"+pending.name+"»")}
+    U.push({id:++nid,name:n,email:m,role:"owner",club:cid,status:"invited"});log("دعوة "+n+" كأونر لـ"+cname);close();render();toast("تم الإنشاء وإرسال الدعوة")};
+}
+/* الإعدادات */
+function applyBrand(){
+  var h=logo?'<img alt="" src="'+logo+'">':esc($("sn").value.trim()[0]||"د");
+  $("hl").innerHTML=h;$("sl").innerHTML=h;$("hn").textContent=$("sn").value.trim()||"دبابة";$("lr").style.display=logo?"block":"none";
+  document.documentElement.style.setProperty("--blue",color);
+}
+$("lf").onchange=function(){var f=this.files[0];if(!f)return;if(f.size>1048576){toast("الصورة أكبر من ١ ميجا");return}var r=new FileReader();r.onload=function(){logo=r.result;applyBrand()};r.readAsDataURL(f)};
+$("lr").onclick=function(){logo=null;applyBrand()};
+$("sn").oninput=applyBrand;
+$("cols").innerHTML=["#2F6BFF","#7A5CFF","#0E9F6E","#E8590C","#D6336C"].map(function(c,i){return '<button style="background:'+c+'" data-c="'+c+'" class="'+(i?'':'sel')+'" aria-label="لون '+(i+1)+'"></button>'}).join("");
+$("cols").onclick=function(e){var b=e.target.closest("button");if(!b)return;color=b.dataset.c;[].forEach.call($("cols").children,function(x){x.classList.toggle("sel",x===b)});applyBrand()};
+[].forEach.call(document.querySelectorAll(".sw"),function(s){s.onclick=function(){var v=s.getAttribute("aria-checked")!=="true";s.setAttribute("aria-checked",v);cfg[s.dataset.k]=v}});
+$("save").onclick=function(){log("تحديث إعدادات الموقع");render();toast("تم حفظ الإعدادات")};
+/* التنقل */
+var nav=$("nav"),pill=$("pill"),tabs=[].slice.call(nav.querySelectorAll("button"));
+function place(b){var n=nav.getBoundingClientRect(),r=b.getBoundingClientRect();pill.style.width=r.width+"px";pill.style.insetInlineStart=(n.right-r.right-1)+"px"}
+tabs.forEach(function(b,i){b.onclick=function(){tabs.forEach(function(x,n){x.classList.toggle("on",n===i);$("tab"+n).classList.toggle("on",n===i)});place(b);window.scrollTo(0,0)}});
+window.addEventListener("resize",function(){place(nav.querySelector(".on"))});
+render();place(tabs[0]);
+</script>
+</body>
+</html>

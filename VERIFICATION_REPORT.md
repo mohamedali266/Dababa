@@ -41,6 +41,6 @@ Generated: 2026-10-01
 | Service role absent from client bundles | PASS | Grep checked `.next/static` and `src`. |
 
 ## Known Blockers
-- `/design-reference/*.html` mockups referenced by `update.json` are not present in the repository, so pixel-faithful visual verification cannot be performed.
+- Reference mockups are now present in `design-reference/`, copied from the provided `style/` directory. Pixel-faithful implementation/visual comparison remains pending future UI work.
 - Full role matrix requires a larger RLS migration and test suite; this pass safely adds the new admin source-of-truth without destructive rewrites.
 - Playwright and pgTAP test harnesses are not currently configured.

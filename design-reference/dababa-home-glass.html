@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>دبابة · الرئيسية</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#EAF1FF;--bg2:#D3E2FF;--text:#0F1B3D;--muted:#5B6B8F;--glass:rgba(255,255,255,.55);--edge:rgba(255,255,255,.85);--shadow:rgba(40,80,170,.16);--track:rgba(47,107,255,.12);--blue:#2F6BFF;--cyan:#22B8E8;--indigo:#7A5CFF;--chip:rgba(47,107,255,.1);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#0B1226;--bg2:#13204A;--text:#EEF3FF;--muted:#9AA9D1;--glass:rgba(255,255,255,.08);--edge:rgba(255,255,255,.18);--shadow:rgba(0,0,0,.35);--track:rgba(255,255,255,.1);--blue:#5B8CFF;--cyan:#4FD0F5;--indigo:#9B86FF;--chip:rgba(255,255,255,.1)}}
+:root[data-theme="dark"]{--bg1:#0B1226;--bg2:#13204A;--text:#EEF3FF;--muted:#9AA9D1;--glass:rgba(255,255,255,.08);--edge:rgba(255,255,255,.18);--shadow:rgba(0,0,0,.35);--track:rgba(255,255,255,.1);--blue:#5B8CFF;--cyan:#4FD0F5;--indigo:#9B86FF;--chip:rgba(255,255,255,.1)}
+*,*:before,*:after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+body{margin:0;min-height:100%;color:var(--text);font-family:"IBM Plex Sans Arabic",system-ui,sans-serif;background:linear-gradient(180deg,var(--bg1),var(--bg2)) fixed}
+body:before,body:after{content:"";position:fixed;border-radius:50%;filter:blur(60px);z-index:-1;opacity:.55}
+body:before{width:260px;height:260px;background:var(--blue);top:-60px;inset-inline-start:-80px;opacity:.35}
+body:after{width:240px;height:240px;background:var(--cyan);bottom:120px;inset-inline-end:-90px;opacity:.35}
+.app{max-width:480px;margin:0 auto;padding:20px 18px 120px}
+button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.glass{background:var(--glass);border:1px solid var(--edge);border-radius:26px;backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);box-shadow:0 10px 30px var(--shadow),inset 0 1px 0 var(--edge)}
+header{display:flex;align-items:center;justify-content:space-between}
+h1{font-size:25px;margin:0;font-weight:700}
+.sub{color:var(--muted);font-size:14px;margin:2px 0 0}
+.avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:var(--blue)}
+.top{display:flex;align-items:center;gap:20px;padding:20px;margin:22px 0 14px}
+.ringwrap{position:relative;width:150px;height:150px;flex:none}
+.ringwrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ringwrap circle{fill:none;stroke-linecap:round}
+.track{stroke:var(--track)}
+.arc{transition:stroke-dashoffset .6s ease}
+.center{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.center b{font-size:30px;line-height:1}
+.center span{font-size:11px;color:var(--muted)}
+.legend{display:grid;gap:12px;flex:1;min-width:0}
+.legend div{display:flex;flex-direction:column;font-size:12px;color:var(--muted)}
+.legend b{color:var(--text);font-size:15px;font-weight:700}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-end:6px}
+.hero{border-radius:28px;padding:22px;color:#fff;position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(47,107,255,.95),rgba(34,184,232,.85));border:1px solid rgba(255,255,255,.5);box-shadow:0 14px 34px rgba(47,107,255,.35),inset 0 1px 0 rgba(255,255,255,.55)}
+.hero small{font-size:13px;opacity:.85}
+.hero h2{font-size:24px;margin:4px 0 12px}
+.meta{display:flex;gap:14px;font-size:13px;margin-bottom:18px;opacity:.95}
+.go{background:rgba(255,255,255,.95);color:#1D4ED8;padding:13px 26px;border-radius:16px;font-weight:700;font-size:16px;min-height:48px;box-shadow:0 6px 16px rgba(0,0,0,.15)}
+.hero:after{content:"";position:absolute;inset-inline-start:-50px;bottom:-70px;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.14)}
+.sec{display:flex;justify-content:space-between;align-items:baseline;margin:24px 0 12px}
+.sec h3{margin:0;font-size:17px}
+.sec a{color:var(--muted);font-size:13px;text-decoration:none}
+.row{display:flex;gap:12px;overflow-x:auto;margin-inline:-18px;padding:4px 18px 16px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.row::-webkit-scrollbar{display:none}
+.card{flex:none;width:205px;padding:16px;scroll-snap-align:start}
+.card h4{margin:0 0 4px;font-size:13px;color:var(--muted);font-weight:500}
+.big{font-size:25px;font-weight:700}
+.big small{font-size:12px;color:var(--muted);font-weight:400}
+.bar{height:8px;border-radius:8px;background:var(--track);margin:12px 0;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:8px;transition:width .5s}
+.btns{display:flex;gap:8px}
+.btns button{flex:1;background:var(--chip);color:var(--blue);border-radius:13px;min-height:44px;font-weight:700}
+.btns button:active{transform:scale(.96)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chips span{background:var(--chip);border-radius:20px;padding:6px 10px;font-size:12px}
+.macro{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.note{color:var(--muted);font-size:12px;text-align:center;margin-top:8px}
+nav{position:fixed;z-index:5;inset-inline:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));max-width:448px;margin:0 auto;padding:6px;display:flex;border-radius:32px}
+.pill{position:absolute;top:6px;bottom:6px;border-radius:26px;background:linear-gradient(180deg,rgba(47,107,255,.2),rgba(47,107,255,.1));border:1px solid rgba(47,107,255,.25);box-shadow:inset 0 1px 0 var(--edge);transition:inset-inline-start .35s cubic-bezier(.3,1.3,.5,1),width .35s}
+nav button{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;color:var(--muted);min-height:54px;border-radius:26px;transition:color .2s}
+nav svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav .on{color:var(--blue);font-weight:700}
+@media (prefers-reduced-motion:reduce){.arc,.bar i,.pill{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div><h1>صباح الخير يا عمر</h1><p class="sub">الخميس · يوم تمرين الصدر</p></div>
+  <div class="avatar glass">ع</div>
+</header>
+
+<section class="top glass" aria-label="تقدم اليوم">
+  <div class="ringwrap">
+    <svg viewBox="0 0 150 150">
+      <circle class="track" cx="75" cy="75" r="66" stroke-width="11"/><circle class="arc" id="r1" cx="75" cy="75" r="66" stroke-width="11" stroke="var(--blue)"/>
+      <circle class="track" cx="75" cy="75" r="50" stroke-width="11"/><circle class="arc" id="r2" cx="75" cy="75" r="50" stroke-width="11" stroke="var(--cyan)"/>
+      <circle class="track" cx="75" cy="75" r="34" stroke-width="11"/><circle class="arc" id="r3" cx="75" cy="75" r="34" stroke-width="11" stroke="var(--indigo)"/>
+    </svg>
+    <div class="center"><b id="pct">0%</b><span>إنجاز اليوم</span></div>
+  </div>
+  <div class="legend">
+    <div><span><i class="dot" style="background:var(--blue)"></i>التمرين</span><b>٠ / ١ جلسة</b></div>
+    <div><span><i class="dot" style="background:var(--cyan)"></i>الماء</span><b id="wl">٠ / ٢٨٠٠ مل</b></div>
+    <div><span><i class="dot" style="background:var(--indigo)"></i>السعرات</span><b>١٢٤٠ / ٢٣٠٠</b></div>
+  </div>
+</section>
+
+<section class="hero">
+  <small>تمرين اليوم · من مدربك أحمد</small>
+  <h2>صدر وتراي</h2>
+  <div class="meta"><span>٦ تمارين</span><span>٦٠ دقيقة</span><span>٤٥٠ سعرة</span></div>
+  <button class="go">ابدأ التمرين</button>
+</section>
+
+<div class="sec"><h3>تابع يومك</h3><a href="#">عرض الكل</a></div>
+<div class="row">
+  <div class="card glass">
+    <h4>الماء</h4>
+    <div class="big"><span id="wv">٠</span> <small>مل</small></div>
+    <div class="bar"><i id="wb" style="width:0;background:var(--cyan)"></i></div>
+    <div class="btns"><button data-add="250">+٢٥٠</button><button data-add="500">+٥٠٠</button></div>
+  </div>
+  <div class="card glass">
+    <h4>الوجبة الجاية · الغداء</h4>
+    <div class="big">٦٥٠ <small>سعرة</small></div>
+    <div class="bar"><i style="width:54%;background:var(--indigo)"></i></div>
+    <div class="macro"><span>بروتين ٤٥ج</span><span>كارب ٧٠ج</span><span>دهون ١٨ج</span></div>
+  </div>
+  <div class="card glass">
+    <h4>المكملات</h4>
+    <div class="big">١ <small>من ٣</small></div>
+    <div class="chips"><span>كرياتين</span><span>فيتامين د ✓</span><span>أوميجا ٣</span></div>
+  </div>
+</div>
+<p class="note">نموذج تصميم · الأرقام تجريبية لعرض الشكل فقط</p>
+</div>
+
+<nav class="glass" id="nav" aria-label="التنقل الرئيسي">
+  <span class="pill" id="pill"></span>
+  <button class="on"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>الرئيسية</button>
+  <button><svg viewBox="0 0 24 24"><path d="M6 8v8M3 10v4M18 8v8M21 10v4M6 12h12"/></svg>التمرين</button>
+  <button><svg viewBox="0 0 24 24"><path d="M7 3v7a3 3 0 0 0 6 0V3M10 13v8M17 3c-2 2-3 5-3 8h3v10"/></svg>التغذية</button>
+  <button><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>التقدم</button>
+  <button><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>حسابي</button>
+</nav>
+
+<script>
+var R=[66,50,34].map(function(r){return 2*Math.PI*r}),P=[0,0,.54],water=0,GOAL=2800;
+var ar=function(n){return String(n).replace(/\d/g,function(d){return "٠١٢٣٤٥٦٧٨٩"[d]})};
+function draw(){
+  P[1]=Math.min(water/GOAL,1);
+  for(var i=0;i<3;i++){var e=document.getElementById("r"+(i+1));e.style.strokeDasharray=R[i];e.style.strokeDashoffset=R[i]*(1-P[i])}
+  document.getElementById("pct").textContent=ar(Math.round((P[0]+P[1]+P[2])/3*100))+"%";
+  document.getElementById("wv").textContent=ar(water);
+  document.getElementById("wl").textContent=ar(water)+" / "+ar(GOAL)+" مل";
+  document.getElementById("wb").style.width=P[1]*100+"%";
+}
+document.querySelectorAll("[data-add]").forEach(function(b){b.onclick=function(){water=Math.min(water+ +b.dataset.add,GOAL);if(navigator.vibrate)navigator.vibrate(10);draw()}});
+var nav=document.getElementById("nav"),pill=document.getElementById("pill"),tabs=nav.querySelectorAll("button");
+function place(b){var n=nav.getBoundingClientRect(),r=b.getBoundingClientRect();pill.style.width=r.width+"px";pill.style.insetInlineStart=(n.right-r.right-1)+"px"}
+tabs.forEach(function(b){b.onclick=function(){tabs.forEach(function(x){x.classList.remove("on")});b.classList.add("on");place(b);if(navigator.vibrate)navigator.vibrate(8)}});
+window.addEventListener("resize",function(){place(nav.querySelector(".on"))});
+draw();place(nav.querySelector(".on"));
+</script>
+</body>
+</html>

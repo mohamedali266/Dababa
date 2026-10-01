@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>دبابة · لوحة النادي</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#EAF1FF;--bg2:#D3E2FF;--text:#0F1B3D;--muted:#5B6B8F;--glass:rgba(255,255,255,.55);--edge:rgba(255,255,255,.85);--shadow:rgba(40,80,170,.16);--field:rgba(255,255,255,.7);--blue:#2F6BFF;--cyan:#22B8E8;--chip:rgba(47,107,255,.1);--track:rgba(47,107,255,.14);--ok:#0E9F6E;--warn:#C77700;--err:#D93A4F;--okb:rgba(14,159,110,.14);--warnb:rgba(245,158,11,.18);--errb:rgba(217,58,79,.14);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#0B1226;--bg2:#13204A;--text:#EEF3FF;--muted:#9AA9D1;--glass:rgba(255,255,255,.08);--edge:rgba(255,255,255,.18);--shadow:rgba(0,0,0,.35);--field:rgba(255,255,255,.08);--blue:#5B8CFF;--cyan:#4FD0F5;--chip:rgba(255,255,255,.1);--track:rgba(255,255,255,.14);--ok:#3DD598;--warn:#FFB84D;--err:#FF7A8A}}
+:root[data-theme="dark"]{--bg1:#0B1226;--bg2:#13204A;--text:#EEF3FF;--muted:#9AA9D1;--glass:rgba(255,255,255,.08);--edge:rgba(255,255,255,.18);--shadow:rgba(0,0,0,.35);--field:rgba(255,255,255,.08);--blue:#5B8CFF;--cyan:#4FD0F5;--chip:rgba(255,255,255,.1);--track:rgba(255,255,255,.14);--ok:#3DD598;--warn:#FFB84D;--err:#FF7A8A}
+*,*:before,*:after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;color:var(--text);font-family:"IBM Plex Sans Arabic",system-ui,sans-serif;background:linear-gradient(180deg,var(--bg1),var(--bg2)) fixed}
+body:before,body:after{content:"";position:fixed;border-radius:50%;filter:blur(60px);z-index:-1}
+body:before{width:280px;height:280px;background:var(--blue);top:-70px;inset-inline-start:-90px;opacity:.35}
+body:after{width:240px;height:240px;background:var(--cyan);bottom:100px;inset-inline-end:-90px;opacity:.35}
+.app{max-width:520px;margin:0 auto;padding:18px 18px 130px}
+button,input,select{font:inherit;color:inherit}
+button{border:0;cursor:pointer;background:none}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.glass{background:var(--glass);border:1px solid var(--edge);border-radius:24px;backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);box-shadow:0 10px 30px var(--shadow),inset 0 1px 0 var(--edge)}
+header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.av{width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:grid;place-items:center;color:#fff;font-weight:700;flex:none}
+header h1{font-size:19px;margin:0}header p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.tab{display:none}.tab.on{display:block;animation:in .25s ease}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{padding:16px}
+.stat small{font-size:13px;color:var(--muted)}
+.stat b{display:block;font-size:28px;margin-top:4px}
+.stat.wide{grid-column:1/-1}
+.stat em{font-style:normal;font-size:12px;color:var(--ok);font-weight:700}
+.chart{display:flex;align-items:flex-end;gap:8px;height:84px;margin-top:12px}
+.chart i{flex:1;border-radius:8px 8px 4px 4px;background:var(--track);display:block;min-height:6px}
+.chart i:last-child{background:linear-gradient(180deg,var(--cyan),var(--blue))}
+.chartl{display:flex;gap:8px;font-size:11px;color:var(--muted);margin-top:6px}.chartl span{flex:1;text-align:center}
+.sec{display:flex;justify-content:space-between;align-items:baseline;margin:24px 0 12px}
+.sec h2{margin:0;font-size:17px}.sec a{font-size:13px;color:var(--blue);font-weight:700;text-decoration:none}
+.list{display:grid;gap:10px}
+.item{display:flex;align-items:center;gap:12px;padding:14px;width:100%;text-align:start}
+.pic{width:44px;height:44px;border-radius:50%;background:var(--chip);display:grid;place-items:center;font-weight:700;color:var(--blue);flex:none}
+.item .t{flex:1;min-width:0}.item b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.item span.s{font-size:12px;color:var(--muted)}
+.badge{font-size:12px;font-weight:700;padding:5px 10px;border-radius:12px;white-space:nowrap}
+.b-ok{background:var(--okb);color:var(--ok)}.b-warn{background:var(--warnb);color:var(--warn)}.b-err{background:var(--errb);color:var(--err)}.b-wait{background:var(--chip);color:var(--muted)}
+.search{width:100%;min-height:50px;border-radius:16px;border:1px solid var(--edge);background:var(--field);padding:0 16px;font-size:16px;margin-bottom:12px}
+.chips{display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;scrollbar-width:none;padding-bottom:2px}.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:42px;padding:0 16px;border-radius:21px;border:1.5px solid var(--edge);background:var(--field);font-weight:500;font-size:14px}
+.chip.sel{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
+.empty{text-align:center;color:var(--muted);padding:30px 0;font-size:14px}
+.tr{padding:16px}.tr .h{display:flex;align-items:center;gap:12px}.tr .bar{height:8px;border-radius:8px;background:var(--track);margin:14px 0 6px;overflow:hidden}.tr .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:8px}
+.tr .m{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.fab{position:fixed;z-index:6;inset-inline-start:20px;bottom:calc(96px + env(safe-area-inset-bottom,0px));height:54px;padding:0 22px;border-radius:27px;color:#fff;font-weight:700;display:none;align-items:center;gap:8px;background:linear-gradient(135deg,var(--blue),var(--cyan));box-shadow:0 12px 26px rgba(47,107,255,.4),inset 0 1px 0 rgba(255,255,255,.5)}
+.fab.show{display:flex}
+nav{position:fixed;z-index:5;inset-inline:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));max-width:488px;margin:0 auto;padding:6px;display:flex;border-radius:32px}
+.pill{position:absolute;top:6px;bottom:6px;border-radius:26px;background:linear-gradient(180deg,rgba(47,107,255,.2),rgba(47,107,255,.1));border:1px solid rgba(47,107,255,.25);transition:inset-inline-start .35s cubic-bezier(.3,1.3,.5,1),width .35s}
+nav button{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;color:var(--muted);min-height:54px;border-radius:26px}
+nav svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav .on{color:var(--blue);font-weight:700}
+.ov{position:fixed;inset:0;z-index:10;background:rgba(10,20,50,.4);display:none;align-items:flex-end}
+.ov.show{display:flex}
+.sheet{width:100%;max-width:520px;margin:0 auto;border-radius:30px 30px 0 0;padding:20px 20px calc(24px + env(safe-area-inset-bottom,0px));background:var(--bg1);border:1px solid var(--edge);animation:up .3s ease;max-height:92%;overflow:auto}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.sheet h3{margin:0 0 4px;font-size:20px}.sheet .sub{color:var(--muted);font-size:14px;margin:0 0 16px}
+.sheet label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
+.sheet input,.sheet select{width:100%;min-height:50px;border-radius:14px;border:1px solid var(--edge);background:var(--field);padding:0 14px;font-size:16px}
+.primary{width:100%;min-height:54px;border-radius:18px;color:#fff;font-weight:700;font-size:17px;margin-top:18px;background:linear-gradient(135deg,var(--blue),var(--cyan));box-shadow:0 12px 26px rgba(47,107,255,.35)}
+.primary:disabled{opacity:.45}
+.ghost{width:100%;min-height:50px;border-radius:16px;font-weight:700;color:var(--muted);margin-top:8px}
+.codebox{text-align:center;padding:22px;margin:6px 0 4px}
+.codebox small{color:var(--muted);font-size:13px}
+.codebox b{display:block;font-size:34px;letter-spacing:5px;margin:8px 0;direction:ltr;color:var(--blue)}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.acts a,.acts button{min-height:50px;border-radius:16px;display:grid;place-items:center;font-weight:700;text-decoration:none;background:var(--chip);color:var(--blue);font-size:15px}
+.acts a{background:#25D366;color:#fff}
+@media (prefers-reduced-motion:reduce){.tab,.sheet{animation:none}.pill{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header><div class="av">ب</div><div><h1>بلاتينيوم فيت</h1><p>لوحة صاحب النادي</p></div></header>
+
+  <section class="tab on" id="tab0">
+    <div class="stats">
+      <div class="stat glass"><small>لاعيبة نشطين</small><b id="sA">٠</b></div>
+      <div class="stat glass"><small>ينتهي اشتراكهم قريبًا</small><b id="sE" style="color:var(--warn)">٠</b></div>
+      <div class="stat glass wide"><small>إيراد الشهر</small><b>٤٢٬٦٠٠ <small>ج.م</small></b><em>▲ ١٢٪ عن الشهر الماضي</em>
+        <div class="chart"><i style="height:48%"></i><i style="height:62%"></i><i style="height:55%"></i><i style="height:72%"></i><i style="height:66%"></i><i style="height:100%"></i></div>
+        <div class="chartl"><span>أبريل</span><span>مايو</span><span>يونيو</span><span>يوليو</span><span>أغسطس</span><span>سبتمبر</span></div></div>
+    </div>
+    <div class="sec"><h2>تحتاج متابعة</h2><a href="#" id="all">كل اللاعيبة</a></div>
+    <div class="list" id="soon"></div>
+  </section>
+
+  <section class="tab" id="tab1">
+    <input class="search" id="q" type="search" placeholder="ابحث باسم لاعب…" aria-label="بحث">
+    <div class="chips" id="flt">
+      <button class="chip sel" data-f="all">الكل</button><button class="chip" data-f="active">نشط</button><button class="chip" data-f="soon">ينتهي قريبًا</button><button class="chip" data-f="expired">منتهي</button><button class="chip" data-f="pending">بانتظار التفعيل</button>
+    </div>
+    <div class="list" id="pl"></div>
+  </section>
+
+  <section class="tab" id="tab2">
+    <div class="list" id="trs"></div>
+  </section>
+</div>
+
+<button class="fab" id="fab"><span style="font-size:22px">＋</span>إضافة لاعب</button>
+
+<nav class="glass" id="nav" aria-label="التنقل">
+  <span class="pill" id="pill"></span>
+  <button class="on"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>نظرة عامة</button>
+  <button><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.500 20c0-3.500 3-5.500 6.500-5.500S15.500 16.500 15.500 20M16 4.500a3.500 3.500 0 0 1 0 7M18 15c2 .6 3.500 2.300 3.500 5"/></svg>اللاعيبة</button>
+  <button><svg viewBox="0 0 24 24"><path d="M6 8v8M3 10v4M18 8v8M21 10v4M6 12h12"/></svg>المدربين</button>
+</nav>
+
+<div class="ov" id="ov"><div class="sheet" id="sh"></div></div>
+
+<script>
+var $=function(i){return document.getElementById(i)};
+var ar=function(n){return String(n).replace(/\d/g,function(d){return "٠١٢٣٤٥٦٧٨٩"[d]})};
+var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
+var T=["كابتن أحمد","كابتن منى","كابتن خالد"];
+var P=[
+ {n:"محمد علي",t:0,d:21},{n:"يوسف حسن",t:0,d:2},{n:"سارة إبراهيم",t:1,d:12},{n:"عمر خالد",t:2,d:-3},
+ {n:"ليلى محمود",t:1,d:5},{n:"كريم سمير",t:0,d:45},{n:"هدى عادل",t:2,d:null},{n:"مصطفى نبيل",t:2,d:28},{n:"نور الدين",t:1,d:-9}
+];
+function st(p){if(p.d===null)return["pending","بانتظار التفعيل","b-wait"];if(p.d<0)return["expired","منتهي منذ "+ar(-p.d)+" أيام","b-err"];if(p.d<=7)return["soon","ينتهي بعد "+ar(p.d)+" أيام","b-warn"];return["active","نشط · "+ar(p.d)+" يوم","b-ok"]}
+function row(p){var s=st(p);return '<div class="item glass"><div class="pic">'+esc(p.n[0])+'</div><div class="t"><b>'+esc(p.n)+'</b><span class="s">'+esc(T[p.t])+'</span></div><span class="badge '+s[2]+'">'+s[1]+'</span></div>'}
+var flt="all";
+function rl(){
+  var q=$("q").value.trim(),r=P.filter(function(p){return (flt==="all"||st(p)[0]===flt)&&p.n.indexOf(q)>-1});
+  $("pl").innerHTML=r.length?r.map(row).join(""):'<div class="empty">مفيش لاعيبة مطابقين</div>';
+}
+function ov(){
+  $("sA").textContent=ar(P.filter(function(p){return st(p)[0]==="active"||st(p)[0]==="soon"}).length);
+  $("sE").textContent=ar(P.filter(function(p){return st(p)[0]==="soon"}).length);
+  var need=P.filter(function(p){var k=st(p)[0];return k==="soon"||k==="expired"}).sort(function(a,b){return a.d-b.d});
+  $("soon").innerHTML=need.map(row).join("");
+  $("trs").innerHTML=T.map(function(t,i){var c=P.filter(function(p){return p.t===i}).length;return '<div class="tr glass"><div class="h"><div class="pic">'+t[6]+'</div><div class="t" style="flex:1"><b>'+t+'</b><span class="s" style="font-size:12px;color:var(--muted)">مدرب لياقة</span></div><span class="badge b-ok">'+ar(c)+' لاعيبة</span></div><div class="bar"><i style="width:'+(c/4*100)+'%"></i></div><div class="m"><span>الحمل: '+ar(c)+' من ٤</span><span>'+(c>=4?"ممتلئ":"متاح")+'</span></div></div>'}).join("");
+  rl();
+}
+$("q").oninput=rl;
+$("flt").onclick=function(e){var b=e.target.closest(".chip");if(!b)return;flt=b.dataset.f;[].forEach.call($("flt").children,function(x){x.classList.toggle("sel",x===b)});rl()};
+var nav=$("nav"),pill=$("pill"),tabs=[].slice.call(nav.querySelectorAll("button"));
+function place(b){var n=nav.getBoundingClientRect(),r=b.getBoundingClientRect();pill.style.width=r.width+"px";pill.style.insetInlineStart=(n.right-r.right-1)+"px"}
+function sel(i){tabs.forEach(function(b,n){b.classList.toggle("on",n===i);$("tab"+n).classList.toggle("on",n===i)});place(tabs[i]);$("fab").classList.toggle("show",i===1);window.scrollTo(0,0)}
+tabs.forEach(function(b,i){b.onclick=function(){sel(i)}});
+$("all").onclick=function(e){e.preventDefault();sel(1)};
+window.addEventListener("resize",function(){place(nav.querySelector(".on"))});
+function code(){var a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",s="";for(var i=0;i<5;i++)s+=a[Math.floor(Math.random()*a.length)];return "PLT-"+s}
+function open(h){$("sh").innerHTML=h;$("ov").classList.add("show")}
+function close(){$("ov").classList.remove("show")}
+$("ov").onclick=function(e){if(e.target===$("ov"))close()};
+$("fab").onclick=function(){
+  open('<h3>إضافة لاعب جديد</h3><p class="sub">هننشئ له كود انضمام يبعته على واتساب.</p><label for="fn">اسم اللاعب</label><input id="fn" placeholder="مثال: أحمد محمد"><label for="ft">المدرب</label><select id="ft">'+T.map(function(t,i){return '<option value="'+i+'">'+t+'</option>'}).join("")+'</select><label for="fp">خطة الاشتراك</label><select id="fp"><option value="30">شهري · ٣٠ يوم</option><option value="90">٣ شهور</option><option value="365">سنوي</option></select><button class="primary" id="mk" disabled>إنشاء الكود</button><button class="ghost" id="cn">إلغاء</button>');
+  $("cn").onclick=close;
+  $("fn").oninput=function(){$("mk").disabled=!this.value.trim()};
+  $("mk").onclick=function(){
+    var n=$("fn").value.trim(),c=code(),t=+$("ft").value,days=+$("fp").value;
+    P.unshift({n:n,t:t,d:null});ov();
+    var msg=encodeURIComponent("أهلًا "+n+"، كود انضمامك لنادي بلاتينيوم فيت: "+c+"\nحمّل تطبيق دبابة وأدخل الكود. الكود يُستخدم مرة واحدة.");
+    open('<h3>تم إنشاء الكود ✓</h3><p class="sub">'+esc(n)+' · '+esc(T[t])+' · '+ar(days)+' يوم</p><div class="codebox glass"><small>كود الانضمام (استخدام واحد)</small><b>'+c+'</b><small>ينتهي بعد ٧ أيام إن لم يُستخدم</small></div><div class="acts"><a href="https://wa.me/?text='+msg+'" target="_blank" rel="noopener">إرسال واتساب</a><button id="cp">نسخ الكود</button></div><button class="ghost" id="dn">تم</button>');
+    $("dn").onclick=close;
+    $("cp").onclick=function(){try{navigator.clipboard.writeText(c)}catch(e){}this.textContent="تم النسخ ✓"};
+  };
+};
+ov();place(tabs[0]);
+</script>
+</body>
+</html>
