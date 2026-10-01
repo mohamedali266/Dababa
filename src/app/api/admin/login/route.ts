@@ -4,7 +4,16 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 const ADMIN_USERNAME = process.env.ADMIN_LOGIN_USERNAME;
 const ADMIN_EMAIL = process.env.ADMIN_LOGIN_EMAIL;
 
+function assertSameOrigin(request: Request) {
+  const origin = request.headers.get("origin");
+  if (!origin) return true;
+  const host = request.headers.get("host");
+  if (!host) return false;
+  try { return new URL(origin).host === host; } catch { return false; }
+}
+
 export async function POST(request: Request) {
+  if (!assertSameOrigin(request)) return NextResponse.json({ error: "bad_origin" }, { status: 403 });
   try {
     const body = await request.json().catch(() => null) as { username?: string; password?: string } | null;
     const username = String(body?.username ?? "").trim().toLowerCase();
@@ -20,8 +29,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
     }
 
-    const { data: roles, error: roleError } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id).in("role", ["admin", "super_admin", "platform_admin"]);
-    if (roleError || !roles?.length) {
+    const { data: adminRow, error: roleError } = await supabase.from("platform_admins").select("user_id").eq("user_id", data.user.id).maybeSingle();
+    if (roleError || !adminRow) {
       await supabase.auth.signOut();
       return NextResponse.json({ error: "not_authorized" }, { status: 403 });
     }

@@ -1,0 +1,243 @@
+{
+  "spec_version": "1.0",
+  "project": "Dababa (دبابة)",
+  "live_site": "https://dababa-nine.vercel.app/",
+  "language_of_this_file": "English instructions, Arabic UI copy preserved exactly as written in the reference files.",
+
+  "purpose": {
+    "one_liner": "A multi-tenant fitness platform (Arabic, RTL, mobile-first PWA) where gym owners run their club, trainers manage their assigned players, and players follow workout/nutrition plans and subscriptions. A player can also use the app alone with no club.",
+    "business_model": "The platform admin creates clubs and their owners. Owners add trainers and players and sell subscriptions. Players join clubs using one-time join codes.",
+    "actors": [
+      "admin: platform super admin, manages everything at /admin",
+      "owner: one owner per club, manages the club, trainers, players, join codes, subscriptions",
+      "trainer: sees and manages only players assigned to them, builds workout and nutrition plans",
+      "player: independent user who can be in zero, one, or many clubs at the same time, each with its own plan and subscription"
+    ],
+    "key_idea": "A player is NOT owned by a club. A player is a standalone user with memberships in 0..N clubs. Personal data (body measurements, workout logs) belongs to the player. Plans and subscriptions belong to the membership."
+  },
+
+  "agent_instructions": {
+    "persona": "Act as a senior product designer and senior full-stack engineer (Next.js, TypeScript, Supabase, PostgreSQL, RLS, web security). Be meticulous. Do not cut corners.",
+    "ground_rules": [
+      "FIRST inspect the existing repository. Keep everything that already works (personal mode: workouts, tracking, nutrition, water, supplements, progress, PWA). Extend, do not rewrite blindly. List what you keep, change, and remove in MIGRATION_NOTES.md before changing code.",
+      "Reproduce the reference designs pixel-faithfully (see reference_files and design_system). Same colors, glass effect, spacing, radii, typography, copy, micro-interactions, and floating bottom navigation with the sliding indicator. Do not restyle, simplify, or substitute components.",
+      "Never trust the client. All authorization is enforced in PostgreSQL (RLS and security definer functions) and on the server. UI hiding is cosmetic only.",
+      "Roles must never overlap or leak. Follow roles_and_permissions exactly. If a rule is ambiguous, choose the MORE restrictive option and document it in NOTES.md.",
+      "Do not ask questions. If something is unspecified, keep the reference behavior, make the safest assumption, and record it in NOTES.md.",
+      "All user-facing text is Arabic, RTL, using Arabic-Indic digits for display only. Store and compute with normal numbers.",
+      "No secrets in the repo. No console.log of sensitive data. No dead code, no TODO placeholders in shipped paths.",
+      "After building, run the full verification in supabase_verification_checklist and testing, fix every failure, and output a final report."
+    ]
+  },
+
+  "reference_files": {
+    "note": "Place these self-contained HTML mockups in /design-reference/ and treat them as the source of truth for layout, styling, copy, and interactions. Data inside them is fake demo data; never ship it.",
+    "files": {
+      "dababa-home-glass.html": "Player home: greeting, 3 progress rings (workout/water/calories), hero workout card, horizontal cards (water with +250/+500, next meal, supplements), floating glass bottom nav (5 tabs)",
+      "dababa-auth.html": "Login / sign up tabs, Google button, email+password with show/hide, 'join with club code' flow with live code formatting and club confirmation card",
+      "dababa-assessment.html": "Onboarding assessment: 5 steps + summary, progress bar, option cards, steppers, day chips, injury chips, waiting-for-trainer card",
+      "dababa-club.html": "Club owner dashboard: overview stats, players list with filters and search, trainers load, add-player sheet that generates a join code with WhatsApp share and copy",
+      "dababa-admin.html": "Platform admin: overview, clubs (2-step create club then owner), users CRUD with roles/suspend/delete, site settings (logo, name, brand color, toggles), audit log"
+    }
+  },
+
+  "stack_and_structure": {
+    "stack": ["Next.js (App Router) + TypeScript strict", "Supabase (Auth, Postgres, Storage, Edge Functions if needed)", "@supabase/ssr with PKCE", "zod for all input validation", "CSS variables + CSS modules or Tailwind configured with the same tokens (no random utility colors)", "Framer Motion only if it matches reference motion", "Playwright for E2E, pgTAP or SQL scripts for RLS tests"],
+    "routes": {
+      "/": "marketing/landing or redirect by role",
+      "/auth": "login + sign up tabs",
+      "/auth/join": "club code entry",
+      "/auth/callback": "OAuth/email code exchange (route handler)",
+      "/onboarding": "assessment flow",
+      "/app/*": "player app (home, workout, nutrition, progress, account) with club switcher",
+      "/club/*": "owner dashboard",
+      "/trainer/*": "trainer area (phase 2, scaffold only with correct guards, no invented visuals)",
+      "/admin/login": "separate admin sign-in",
+      "/admin/*": "admin panel"
+    },
+    "guards": "Server-side middleware plus server component checks on every protected route. Role is resolved from the database, never from user_metadata or a client-sent value."
+  },
+
+  "design_system": {
+    "direction": "RTL, Arabic, mobile-first. Light 'icy blue' theme with frosted-glass (liquid glass) surfaces, plus an automatic dark theme via prefers-color-scheme and [data-theme].",
+    "font": "IBM Plex Sans Arabic (400, 500, 700) from Google Fonts with system-ui fallback.",
+    "tokens_light": {
+      "--bg1": "#EAF1FF", "--bg2": "#D3E2FF", "--text": "#0F1B3D", "--muted": "#5B6B8F",
+      "--glass": "rgba(255,255,255,.55)", "--edge": "rgba(255,255,255,.85)", "--shadow": "rgba(40,80,170,.16)",
+      "--field": "rgba(255,255,255,.7)", "--blue": "#2F6BFF", "--cyan": "#22B8E8", "--indigo": "#7A5CFF",
+      "--chip": "rgba(47,107,255,.1)", "--track": "rgba(47,107,255,.14)",
+      "--ok": "#0E9F6E", "--warn": "#C77700", "--err": "#D93A4F",
+      "--okb": "rgba(14,159,110,.14)", "--warnb": "rgba(245,158,11,.18)", "--errb": "rgba(217,58,79,.14)"
+    },
+    "tokens_dark": {
+      "--bg1": "#0B1226", "--bg2": "#13204A", "--text": "#EEF3FF", "--muted": "#9AA9D1",
+      "--glass": "rgba(255,255,255,.08)", "--edge": "rgba(255,255,255,.18)", "--shadow": "rgba(0,0,0,.35)",
+      "--field": "rgba(255,255,255,.08)", "--blue": "#5B8CFF", "--cyan": "#4FD0F5", "--indigo": "#9B86FF",
+      "--chip": "rgba(255,255,255,.1)", "--track": "rgba(255,255,255,.14)",
+      "--ok": "#3DD598", "--warn": "#FFB84D", "--err": "#FF7A8A"
+    },
+    "background": "linear-gradient(180deg, var(--bg1), var(--bg2)) fixed, plus two blurred color blobs (blur 60px, opacity .35) using --blue and --cyan placed in opposite corners behind content (z-index -1).",
+    "glass_surface": "background var(--glass); border 1px solid var(--edge); border-radius 24px (cards) / 26-28px (large); backdrop-filter blur(22px) saturate(160%) (include -webkit- prefix); box-shadow 0 10px 30px var(--shadow), inset 0 1px 0 var(--edge).",
+    "primary_gradient": "linear-gradient(135deg, var(--blue), var(--cyan)) with shadow 0 12px 26px rgba(47,107,255,.35) and inset 0 1px 0 rgba(255,255,255,.5). White text, weight 700, min-height 54px, radius 18px.",
+    "hero_card": "135deg gradient rgba(47,107,255,.95) to rgba(34,184,232,.85), white text, 1px border rgba(255,255,255,.5), decorative translucent white circle at the bottom inline-start, white button with #1D4ED8 text.",
+    "floating_nav": "Fixed, inset-inline 16px, bottom 14px + safe-area, glass pill radius 32px, padding 6px. Buttons flex:1, min-height 54px, icon 23px stroke 1.8 + 11px label. Active tab uses --blue and weight 700. A sliding indicator pill (gradient rgba(47,107,255,.2)->.1, 1px border rgba(47,107,255,.25), radius 26px) animates inset-inline-start and width with cubic-bezier(.3,1.3,.5,1) .35s.",
+    "tabs_per_role": {
+      "player": ["الرئيسية", "التمرين", "التغذية", "التقدم", "حسابي"],
+      "owner": ["نظرة عامة", "اللاعيبة", "المدربين"],
+      "admin": ["نظرة عامة", "النوادي", "المستخدمين", "الإعدادات"]
+    },
+    "components": "Segmented control, option cards with check circle, steppers (46px round buttons), chips, status badges (ok/warn/err/wait), toggle switch (52x32, role=switch), bottom sheet modals (radius 30px top, slide-up .3s), toast, FAB, progress bar (8px, gradient fill), concentric progress rings, skeletons and illustrated empty states.",
+    "ux_rules": ["Tap targets >= 44px", "Visible :focus-visible outline 2px var(--blue)", "Respect prefers-reduced-motion", "Respect safe-area insets (env(safe-area-inset-*)) with viewport-fit=cover", "Do NOT set maximum-scale or user-scalable=no", "Haptic navigator.vibrate(8-10) on selections where supported", "Numbers displayed in Arabic-Indic digits", "Never show fake/demo numbers before real data exists: show helpful empty states instead"]
+  },
+
+  "screens": {
+    "auth": [
+      "Tabs: دخول / حساب جديد. Google button first, then email + password (show/hide), 'نسيت كلمة المرور؟' only on login.",
+      "Card 'عندك كود من ناديك؟' leads to the club-code screen. Terms/privacy note below.",
+      "Sign-up asks name + email + password only. No role selection ever."
+    ],
+    "join_code": [
+      "Single input, auto-uppercase, auto-format XXX-XXXXX, max 9 chars, LTR.",
+      "On a valid code show a club confirmation card (club name, trainer, subscription length). Invalid/used/expired show distinct but non-enumerating messages (see security).",
+      "'ليس لدي كود · أكمل بشكل شخصي' continues to personal sign-up if the admin setting allows personal sign-up."
+    ],
+    "assessment": [
+      "Steps: goal, body (gender, age, height, weight via steppers), level, training days + place, injuries (optional, 'لا يوجد' clears others), then summary.",
+      "Next disabled until valid. Skip only on body and injuries. Back on every step. Save progress after every step so it resumes.",
+      "Final screen: with a club membership show 'المدرب بيجهز خطتك' with pulse; without a club generate a personal plan and enter the app."
+    ],
+    "player_home": "Greeting by real name, 3 rings, hero card with today's workout (empty state if none), horizontal cards for water/next meal/supplements, club switcher (شخصي / نادي X / نادي Y) controlling context.",
+    "owner_dashboard": "Overview stats + revenue chart + 'تحتاج متابعة'; players list with search and filters (الكل، نشط، ينتهي قريبًا، منتهي، بانتظار التفعيل); trainers with load bars; FAB 'إضافة لاعب' generating a join code with copy and WhatsApp share.",
+    "admin_panel": "Overview + roles breakdown + audit log; Clubs (2-step: club then owner invite, edit, suspend, delete with impact count); Users (search, role filter, add by invite, edit, suspend, delete with confirm; admin cannot delete/suspend/demote self); Settings (logo upload with preview and remove, site name, brand color swatches applied live, toggles: Google login, personal sign-up, maintenance mode, expiry notifications, join code expiry days).",
+    "trainer_area": "Phase 2. Create guarded routes and RLS only. Do not invent UI beyond the design system."
+  },
+
+  "roles_and_permissions": {
+    "storage_of_roles": "Global admin lives ONLY in table platform_admins (user_id). Club roles live ONLY in memberships.role. Never read roles from auth user_metadata (user-editable) or from JWT claims set by clients. Never accept role/club_id from the client on any insert/update.",
+    "matrix": {
+      "admin": "Full control through server-only endpoints using the service role after verifying platform_admins. Can create clubs/owners, manage all users, settings, audit log. Cannot be removed/suspended/demoted by themselves; there must always be at least one active admin.",
+      "owner": "Only their own club: manage trainers and players, create join codes, manage subscriptions, view stats. Cannot see other clubs. Cannot change their own role or create another owner. Exactly one owner per club (partial unique index).",
+      "trainer": "Only players whose membership.trainer_membership_id points to them within the same club: read their profile data needed for coaching, create/edit workout and nutrition plans for those memberships. No access to subscriptions/revenue, other trainers, or other clubs.",
+      "player": "Own profile and own logs always. Plans and subscriptions only for own memberships. Can leave a club (membership ends, trainer access ends immediately, personal data stays). Can join multiple clubs."
+    },
+    "invariants": [
+      "A user can hold at most one membership per club (unique user_id, club_id).",
+      "trainer and owner memberships require club_id and are created only by owner/admin server paths, never by self-service.",
+      "A player's trainer must be a trainer membership in the SAME club (enforce with composite FK or trigger).",
+      "Suspended user (profiles.status='suspended') or suspended club blocks all access: enforce in RLS helper functions and middleware, and also ban the auth user via the admin API.",
+      "No role/privilege change is possible by a user on their own row (use separate tables or column-level grants plus triggers)."
+    ]
+  },
+
+  "data_model": {
+    "tables": {
+      "profiles": "id uuid PK references auth.users on delete cascade, full_name, avatar_url, gender, birth_year/age, height_cm, weight_kg, status (active|suspended|invited), created_at. Created by an AFTER INSERT trigger on auth.users (security definer, set search_path = ''). Trigger must NOT read any role from raw_user_meta_data.",
+      "platform_admins": "user_id uuid PK references auth.users. No client write access at all.",
+      "clubs": "id, name, city, plan (basic|pro|ent), status (active|suspended), code_prefix text unique (3 letters), logo_url, created_at.",
+      "memberships": "id, user_id, club_id, role (owner|trainer|player), trainer_membership_id nullable, status (active|invited|ended|suspended), created_at. unique(user_id, club_id). Partial unique index: one active owner per club. Check: trainer_membership_id only for role=player.",
+      "subscriptions": "id, membership_id, plan_days, starts_at, ends_at, status, price. Belongs to the membership, never to the user.",
+      "join_codes": "id, club_id, code text UNIQUE (global, format PREFIX-XXXXX with alphabet ABCDEFGHJKLMNPQRSTUVWXYZ23456789, no O/0/I/1), player_name, trainer_membership_id, plan_days, expires_at, used_by, used_at, created_by.",
+      "join_attempts": "user_id/ip hash, attempted_at, success. Used for rate limiting.",
+      "assessments": "user_id, goal, level, training_days text[], place, injuries text[], completed_at. Club-specific preferences may be duplicated per membership if needed.",
+      "workout_plans / workout_days / exercises / workout_logs": "Plans belong to membership_id (or to a personal plan owned by user_id with club_id null). Logs belong to user_id.",
+      "nutrition_plans / meals / water_logs / supplement_logs": "Same ownership rules as workouts.",
+      "site_settings": "single row: site_name, logo_path, brand_color, google_login_enabled, personal_signup_enabled, maintenance_mode, expiry_notifications, code_expiry_days. Public read of non-sensitive fields; admin write only.",
+      "audit_log": "id, actor_id, action, target_type, target_id, details jsonb, created_at. Append-only: no update or delete grants for any role; written by server/security definer functions only."
+    },
+    "rules": [
+      "Every club-scoped table has club_id (or reaches it via membership) and is filtered by RLS, not by the UI.",
+      "Enable RLS on EVERY table in public. Default deny. Add explicit policies per role and per operation (select/insert/update/delete separately).",
+      "Use helper functions (security definer, set search_path = '', stable): is_platform_admin(), is_club_member(club_id), is_club_owner(club_id), is_trainer_of(player_user_id), is_active_user(). Revoke execute from public/anon where not needed. Avoid recursive policies.",
+      "Add indexes on user_id, club_id, membership_id, trainer_membership_id, join_codes.code, subscriptions.ends_at.",
+      "Use migrations (supabase/migrations) only. No manual dashboard changes. Seed script for local dev uses fake data and is never run in production."
+    ]
+  },
+
+  "auth_flows": {
+    "providers": "Email+password and Google OAuth (PKCE). Phone/OTP is out of scope for now.",
+    "sign_up": [
+      "Create auth user. Email confirmation ON. Trigger creates profiles row with status 'active' (self sign-up) and NO membership.",
+      "Respect site_settings.personal_signup_enabled (enforce server-side, not only in the UI).",
+      "If a join code was entered earlier, keep it only as an opaque value in an httpOnly cookie or server session, then redeem AFTER the user is authenticated."
+    ],
+    "login": "Generic error messages (no account enumeration). Session via @supabase/ssr cookies. Server uses auth.getUser() (never trust getSession() alone). After login redirect by resolved role: admin -> /admin, owner -> /club, trainer -> /trainer, player -> /app or /onboarding if incomplete.",
+    "google": "Enable provider in Supabase. Add exact redirect URLs (production, preview, localhost) to the allow-list. /auth/callback exchanges the code for a session and validates the 'next' param against an allow-list of internal paths (prevent open redirect). Linking by verified email only.",
+    "join_code_preview": "Server-side route/edge function with IP rate limit returns only club name, trainer name, plan length for a valid unused unexpired code. Never return codes or other data.",
+    "join_code_redeem": "RPC redeem_join_code(code) SECURITY DEFINER, set search_path = '', auth.uid() required. In ONE transaction: lock the code row (FOR UPDATE), verify not used and not expired, check club active, reject if user already has a membership in that club, create membership(role=player, trainer from code), create subscription, mark code used (used_by, used_at), write audit_log. Rate limit via join_attempts (e.g. 5 failures/15 min per user and per IP). Same generic failure response for wrong/used/expired to avoid enumeration (the owner UI may show detailed state).",
+    "admin_user_management": "Next.js server route handlers/server actions only. Each: verify session -> verify platform_admins -> validate with zod -> perform with service role -> write audit_log. Invites use supabase.auth.admin.inviteUserByEmail. Suspend = set status + ban the auth user. Delete = remove auth user (cascade) after checking last-admin and last-owner rules.",
+    "owner_actions": "Owner creating players/trainers/codes goes through server actions that verify is_club_owner for the target club. Owner can never target another club_id.",
+    "create_club_then_owner": "Atomic server action: validate -> insert club -> invite owner -> create owner membership -> audit_log. If the invite fails, roll back the club (single transaction/compensating delete)."
+  },
+
+  "security_requirements": [
+    "Service role key only in server env vars (never NEXT_PUBLIC_, never sent to the browser, never in logs). Use a server-only module with 'server-only' import.",
+    "No dangerouslySetInnerHTML with user data. Escape/encode everything; React default escaping only.",
+    "Validate and sanitize all inputs with zod on the server (lengths, formats, enums). Reject unknown fields. Never spread request bodies into DB writes.",
+    "CSRF: server actions/route handlers must verify same-origin (Origin/Host) and use SameSite=Lax cookies.",
+    "Security headers: strict Content-Security-Policy (allow only self, Supabase URL, fonts.googleapis.com/fonts.gstatic.com, Google OAuth as needed), X-Content-Type-Options nosniff, Referrer-Policy strict-origin-when-cross-origin, frame-ancestors 'none', Permissions-Policy minimal, HSTS.",
+    "Logo upload: Supabase Storage bucket 'branding'; only admin can write; accept PNG/JPEG/WebP only (NO SVG unless sanitized server-side), max 1 MB, verify magic bytes, random filename, public read of that bucket only. Avatars: per-user folder policies.",
+    "Rate limit auth, join-code, and invite endpoints. Enable CAPTCHA (Supabase Auth) for sign-up/reset if available. Enforce minimum password length 8+, enable leaked-password protection if the plan supports it.",
+    "Admin area: separate /admin/login, no admin links in player UI, recommend and scaffold MFA (Supabase TOTP) required for platform admins.",
+    "Audit log for every admin/owner mutation (who, what, target, when). Append-only.",
+    "Never expose stack traces or SQL errors to the client. Map to safe Arabic messages.",
+    "Dependencies: pin versions, run npm audit, no unnecessary packages.",
+    "PWA: service worker must never cache authenticated API responses or admin pages.",
+    "Do not store tokens or personal data in localStorage. Use httpOnly cookies handled by @supabase/ssr."
+  ],
+
+  "supabase_verification_checklist": {
+    "instruction": "Before declaring done, verify EVERY item below against the real schema/code and report pass/fail with evidence in VERIFICATION_REPORT.md. Fix failures.",
+    "items": [
+      "RLS is enabled on all public tables; list any table without it (must be none).",
+      "Every table has policies per operation; anon has no access except explicitly intended public reads (site_settings public fields, branding logo).",
+      "The auth.users insert trigger creates exactly one profiles row, never assigns a role, never fails sign-up on null names, and is security definer with a pinned search_path.",
+      "No code path reads role from user_metadata/raw_user_meta_data or from client input.",
+      "A player cannot: insert/update memberships for themselves, change role, change club_id, read another user's profile/logs/plans/subscriptions, read join_codes, read audit_log.",
+      "A trainer cannot read players outside their assignment, cannot read subscriptions/revenue, cannot read other clubs.",
+      "An owner cannot read or write any other club's data, cannot create a second owner, cannot grant admin.",
+      "Admin endpoints reject non-admins (401/403) even with a valid session; verify with direct API calls.",
+      "redeem_join_code: concurrent double-redeem results in exactly one membership (race test), expired/used/invalid codes fail generically, rate limit works, user already in club cannot redeem again, user can join a second different club successfully.",
+      "Suspended user/club is denied by RLS and middleware and cannot refresh into a working session (auth ban applied).",
+      "Deleting a club does not delete player auth users or their personal data; players fall back to personal mode. Deleting a user cascades only that user's data.",
+      "Last active admin and last owner protections work.",
+      "Google OAuth: redirect URLs correct for prod/preview/local; /auth/callback rejects external 'next' values; new Google user gets profile and goes through onboarding; same verified email links to the same account.",
+      "Email confirmation, password reset, and invite links all land on working pages with correct session handling.",
+      "Foreign keys, ON DELETE behaviors, unique constraints, and check constraints match data_model.invariants; no orphan rows possible.",
+      "Storage policies: only admin can write branding; users can only touch their own avatar folder.",
+      "Environment variables documented in .env.example; service role key is absent from client bundles (grep the build output)."
+    ]
+  },
+
+  "testing": {
+    "rls_tests": "SQL/pgTAP tests that impersonate each role (set local role authenticated; set request.jwt.claims) and assert allowed and denied operations for every table and every role in the matrix.",
+    "e2e_playwright": [
+      "Sign up -> onboarding -> personal mode works with no club",
+      "Join club by code -> membership + subscription created -> club switcher shows it",
+      "Join a second club with a different code -> both memberships active, plans separated",
+      "Owner generates a code, a player redeems it, the code cannot be reused",
+      "Trainer sees only assigned players",
+      "Admin creates club then owner (atomic), suspends and deletes users, changes logo/brand color",
+      "Non-admin hitting /admin/* and admin APIs is blocked",
+      "Visual check: screenshots at 390px width (light and dark) compared with the reference files, RTL intact"
+    ],
+    "static_checks": "tsc --noEmit, eslint, npm audit, and a grep for service-role usage in client code."
+  },
+
+  "deliverables": [
+    "Working implementation matching the references",
+    "supabase/migrations/*.sql (schema, RLS, functions, triggers, storage policies) + seed for local dev only",
+    ".env.example",
+    "MIGRATION_NOTES.md (what was kept/changed/removed)",
+    "NOTES.md (assumptions and decisions)",
+    "VERIFICATION_REPORT.md (checklist results with evidence)",
+    "Tests (RLS + E2E) passing in CI"
+  ],
+
+  "definition_of_done": [
+    "Every screen visually matches its reference at mobile width in light and dark",
+    "All role boundaries proven by tests, not assumptions",
+    "No secrets exposed, no open redirect, no privilege escalation path, no account enumeration",
+    "Auth + Supabase relationships verified end to end (sign-up, login, Google, invite, join code, multi-club, suspend, delete)",
+    "The existing personal-mode features still work for users without a club"
+  ]
+}

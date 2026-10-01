@@ -6,7 +6,6 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type AdminContext = { userId: string; email: string | null; isPlatformAdmin: boolean; staffGymIds: string[] };
 
-const adminRoleNames = ["super_admin", "admin", "platform_admin"];
 const staffRoleNames = ["owner", "coach"];
 const accountRoles = ["user", "platform_admin", "gym_owner", "coach", "athlete"] as const;
 
@@ -19,6 +18,14 @@ const deleteUserSchema = z.object({ action: z.literal("deleteUser"), userId: z.s
 
 const actionSchema = z.discriminatedUnion("action", [createGymSchema, createAthleteCodeSchema, updateBrandingSchema, createUserSchema, updateUserSchema, deleteUserSchema]);
 
+function assertSameOrigin(request: Request) {
+  const origin = request.headers.get("origin");
+  if (!origin) return true;
+  const host = request.headers.get("host");
+  if (!host) return false;
+  try { return new URL(origin).host === host; } catch { return false; }
+}
+
 function jsonError(message: string, status: number) { return NextResponse.json({ error: message }, { status }); }
 
 async function getContext(): Promise<AdminContext | null> {
@@ -28,11 +35,11 @@ async function getContext(): Promise<AdminContext | null> {
 
   const adminSupabase = createSupabaseAdminClient();
   const [{ data: roles }, { data: staffRows }] = await Promise.all([
-    adminSupabase.from("user_roles").select("role").eq("user_id", user.id),
+    adminSupabase.from("platform_admins").select("user_id").eq("user_id", user.id).maybeSingle(),
     adminSupabase.from("gym_memberships").select("gym_id, role, status").eq("user_id", user.id).eq("status", "active")
   ]);
 
-  const isPlatformAdmin = Boolean(roles?.some((row) => adminRoleNames.includes(String(row.role))));
+  const isPlatformAdmin = Boolean(roles);
   const staffGymIds = (staffRows ?? []).filter((row) => staffRoleNames.includes(String(row.role))).map((row) => String(row.gym_id));
   return { userId: user.id, email: user.email ?? null, isPlatformAdmin, staffGymIds };
 }
@@ -104,6 +111,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  if (!assertSameOrigin(request)) return jsonError("bad_origin", 403);
   const context = await getContext();
   if (!context) return jsonError("not_authenticated", 401);
   const parsed = actionSchema.safeParse(await request.json().catch(() => null));
@@ -119,6 +127,8 @@ export async function POST(request: NextRequest) {
     if (created.error || !created.data.user) return jsonError(created.error?.message ?? "create_failed", 500);
     await adminSupabase.from("profiles").upsert({ id: created.data.user.id, display_name: parsed.data.displayName, locale: "ar", unit_system: "metric", theme: "dark" }, { onConflict: "id" });
     await setSingleRole(created.data.user.id, parsed.data.role);
+    if (parsed.data.role === "platform_admin") await adminSupabase.from("platform_admins").upsert({ user_id: created.data.user.id, created_by_user_id: context.userId }, { onConflict: "user_id" });
+    await adminSupabase.rpc("write_audit_log", { action_name: "create_user", target_kind: "user", target_identifier: created.data.user.id, event_details: { role: parsed.data.role } });
     return NextResponse.json({ ok: true, user: created.data.user.id });
   }
 
@@ -133,14 +143,23 @@ export async function POST(request: NextRequest) {
       if (updated.error) return jsonError(updated.error.message, 500);
     }
     if (parsed.data.displayName) await adminSupabase.from("profiles").upsert({ id: parsed.data.userId, display_name: parsed.data.displayName, locale: "ar", unit_system: "metric", theme: "dark" }, { onConflict: "id" });
-    if (parsed.data.role) await setSingleRole(parsed.data.userId, parsed.data.role);
+    if (parsed.data.role) {
+      await setSingleRole(parsed.data.userId, parsed.data.role);
+      if (parsed.data.role === "platform_admin") await adminSupabase.from("platform_admins").upsert({ user_id: parsed.data.userId, created_by_user_id: context.userId }, { onConflict: "user_id" });
+      else if (parsed.data.userId !== context.userId) await adminSupabase.from("platform_admins").delete().eq("user_id", parsed.data.userId);
+    }
+    await adminSupabase.rpc("write_audit_log", { action_name: "update_user", target_kind: "user", target_identifier: parsed.data.userId, event_details: { role: parsed.data.role ?? null } });
     return NextResponse.json({ ok: true });
   }
 
   if (parsed.data.action === "deleteUser") {
     if (parsed.data.userId === context.userId) return jsonError("cannot_delete_self", 400);
+    const { count } = await adminSupabase.from("platform_admins").select("user_id", { count: "exact", head: true });
+    const { data: targetAdmin } = await adminSupabase.from("platform_admins").select("user_id").eq("user_id", parsed.data.userId).maybeSingle();
+    if (targetAdmin && (count ?? 0) <= 1) return jsonError("cannot_delete_last_admin", 400);
     const { error } = await adminSupabase.auth.admin.deleteUser(parsed.data.userId);
     if (error) return jsonError(error.message, 500);
+    await adminSupabase.rpc("write_audit_log", { action_name: "delete_user", target_kind: "user", target_identifier: parsed.data.userId, event_details: {} });
     return NextResponse.json({ ok: true });
   }
 

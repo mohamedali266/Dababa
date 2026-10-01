@@ -3,8 +3,6 @@ import { AdminShell } from "@/features/admin/admin-shell";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-const adminRoles = ["admin", "super_admin", "platform_admin"];
-
 export default async function Page() {
   const supabase = await createSupabaseServerClient();
   const { data: { user }, error } = await supabase.auth.getUser();
@@ -14,8 +12,8 @@ export default async function Page() {
   }
 
   const adminSupabase = createSupabaseAdminClient();
-  const { data: roles, error: roleError } = await adminSupabase.from("user_roles").select("role").eq("user_id", user.id);
-  const isAdmin = !roleError && Boolean(roles?.some((row) => adminRoles.includes(String(row.role))));
+  const { data: adminRow, error: roleError } = await adminSupabase.from("platform_admins").select("user_id").eq("user_id", user.id).maybeSingle();
+  const isAdmin = !roleError && Boolean(adminRow);
 
   if (!isAdmin) {
     await supabase.auth.signOut();
