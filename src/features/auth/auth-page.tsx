@@ -59,8 +59,8 @@ const cleanCode = (value: string) => value.trim().replace(/[^a-zA-Z0-9]/g, "").t
 export function AuthPage() {
   const [locale, setLocale] = useState<Locale>("ar");
   const [theme] = useState<ThemeChoice>(() => {
-    if (typeof window === "undefined") return "dark";
-    return (localStorage.getItem("dababa-theme") as ThemeChoice | null) ?? "dark";
+    if (typeof window === "undefined") return "system";
+    return (localStorage.getItem("dababa-theme") as ThemeChoice | null) ?? "system";
   });
   const [entryStep, setEntryStep] = useState<AuthEntry>("welcome");
   const [signinEmail, setSigninEmail] = useState("");

@@ -1,9 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Cairo, Sora } from "next/font/google";
+import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 
-const cairo = Cairo({ subsets: ["arabic", "latin"], variable: "--font-arabic", display: "swap" });
-const sora = Sora({ subsets: ["latin"], variable: "--font-latin", display: "swap" });
+const ibmPlexArabic = IBM_Plex_Sans_Arabic({ subsets: ["arabic", "latin"], weight: ["400", "500", "700"], variable: "--font-arabic", display: "swap" });
 
 export const metadata: Metadata = {
   title: { default: "Dababa", template: "%s · Dababa" },
@@ -33,19 +32,19 @@ export const viewport: Viewport = {
 const themeBoot = `
 (() => {
   try {
-    const saved = localStorage.getItem("dababa-theme") || "dark";
+    const saved = localStorage.getItem("dababa-theme") || "system";
     const system = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
     document.documentElement.dataset.theme = saved === "system" ? system : saved;
   } catch {
-    document.documentElement.dataset.theme = "dark";
+    document.documentElement.dataset.theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   }
 })();
 `;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" data-theme="dark" suppressHydrationWarning>
-      <body className={`${cairo.variable} ${sora.variable}`}>
+    <html lang="ar" dir="rtl" data-theme="light" suppressHydrationWarning>
+      <body className={ibmPlexArabic.variable}>
         <script dangerouslySetInnerHTML={{ __html: themeBoot }} />
         {children}
       </body>

@@ -59,8 +59,8 @@ export function DashboardShell({ securityAlert = null }: { securityAlert?: Secur
   const [locale, setLocale] = useState<Locale>("ar");
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [theme, setTheme] = useState<ThemeChoice>(() => {
-    if (typeof window === "undefined") return "dark";
-    return (localStorage.getItem("dababa-theme") as ThemeChoice | null) ?? "dark";
+    if (typeof window === "undefined") return "system";
+    return (localStorage.getItem("dababa-theme") as ThemeChoice | null) ?? "system";
   });
   const [data, setData] = useState<DashboardData>(emptyData);
   const [smartTracking, setSmartTracking] = useState(true);
