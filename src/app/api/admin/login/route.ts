@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-const ADMIN_USERNAME = "admin";
+const ADMIN_USERNAME = process.env.ADMIN_LOGIN_USERNAME;
 const ADMIN_EMAIL = process.env.ADMIN_LOGIN_EMAIL;
 
 export async function POST(request: Request) {
@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     const username = String(body?.username ?? "").trim().toLowerCase();
     const password = String(body?.password ?? "");
 
-    if (!ADMIN_EMAIL || username !== ADMIN_USERNAME || password.length < 6) {
+    if (!ADMIN_USERNAME || !ADMIN_EMAIL || username !== ADMIN_USERNAME || password.length < 6) {
       return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
     }
 

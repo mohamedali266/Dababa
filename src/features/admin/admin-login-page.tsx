@@ -67,7 +67,8 @@ export function AdminLoginPage() {
         <GlassCard className="auth-panel admin-login-panel">
           <form className="auth-form" onSubmit={handleSubmit}>
             <span className="eyebrow">{pick(locale, "بوابة الإدارة", "Admin portal")}</span>
-            <h2>{pick(locale, "تسجيل دخول الأدمن", "Admin sign in")}</h2>
+            <h2>{pick(locale, "تسجيل دخول الإدارة", "Administration sign in")}</h2>
+            <p className="admin-login-note">{pick(locale, "هذه الصفحة للدخول فقط. إنشاء حسابات الإدارة يتم من داخل لوحة التحكم بعد تسجيل الدخول.", "This page is for sign-in only. Administration accounts are created from inside the console after sign-in.")}</p>
             <div className="auth-field-stack">
               <label className="auth-field"><span>{pick(locale, "اسم المستخدم", "Username")}</span><div className="auth-input-wrap"><UserRound size={18} /><input autoComplete="username" required value={username} onChange={(event) => setUsername(event.target.value)} placeholder={pick(locale, "اسم المستخدم", "Username")} /></div></label>
               <label className="auth-field"><span>{pick(locale, "كلمة المرور", "Password")}</span><div className="auth-input-wrap"><LockKeyhole size={18} /><input autoComplete="current-password" minLength={6} required type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="********" /><button aria-label={pick(locale, showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور", showPassword ? "Hide password" : "Show password")} onClick={() => setShowPassword((value) => !value)} type="button">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div></label>

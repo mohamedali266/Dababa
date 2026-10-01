@@ -2088,3 +2088,14 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+.admin-login-note {
+  margin: -4px 0 0;
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 11px 12px;
+  color: var(--text-secondary);
+  background: color-mix(in oklab, var(--warning) 12%, var(--glass-fill));
+  font-size: 0.84rem;
+  font-weight: 850;
+}

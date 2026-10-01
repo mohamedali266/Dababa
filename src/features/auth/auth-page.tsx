@@ -377,7 +377,7 @@ export function AuthPage() {
               <button className="auth-submit" disabled={authBusy} type="submit">{authBusy ? <Loader2 className="spin" size={17} /> : null}{pick(locale, "تسجيل الدخول", "Sign in")}</button>
               <button className="google-button" disabled={authBusy} onClick={handleGoogleAuth} type="button"><span>G</span>{pick(locale, "الدخول باستخدام Google", "Continue with Google")}</button>
               {authMessage ? <span className="auth-message">{authMessage}</span> : null}
-              <Link className="back-link" href="/admin/login"><ShieldCheck size={16} />{pick(locale, "دخول الإدارة", "Admin login")}</Link>
+              <Link className="back-link" href="/">{pick(locale, "العودة للتطبيق", "Back to product")}</Link>
             </form>
           ) : (
             <form className="auth-form onboarding-form" onSubmit={finishSignup}>
@@ -400,7 +400,7 @@ export function AuthPage() {
               <div className="wizard-actions"><button className="secondary-cta" disabled={signupStep === 0 || authBusy} onClick={() => setSignupStep((current) => Math.max(0, current - 1) as SignupStep)} type="button">{pick(locale, "السابق", "Back")}</button>{signupStep < 4 ? <button className="auth-submit" disabled={authBusy} onClick={goNext} type="button">{pick(locale, "التالي", "Next")}</button> : <button className="auth-submit" disabled={authBusy} type="submit">{authBusy ? <Loader2 className="spin" size={17} /> : null}{pick(locale, "إنهاء التسجيل", "Finish signup")}</button>}</div>
               <button className="google-button" disabled={authBusy || Boolean(googleUser)} onClick={handleGoogleAuth} type="button"><span>G</span>{googleUser ? pick(locale, "Google متصل", "Google connected") : pick(locale, "التسجيل باستخدام Google", "Sign up with Google")}</button>
               {authMessage ? <span className="auth-message">{authMessage}</span> : null}
-              <Link className="back-link" href="/admin/login"><ShieldCheck size={16} />{pick(locale, "دخول الإدارة", "Admin login")}</Link>
+              <Link className="back-link" href="/">{pick(locale, "العودة للتطبيق", "Back to product")}</Link>
             </form>
           )}
         </GlassCard>
