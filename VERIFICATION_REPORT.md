@@ -1,46 +1,53 @@
 # Verification Report
 
-Generated: 2026-10-01
+Generated: 2026-10-03
+Branch: redesign
 
-## Implemented In This Pass
-- Added `platform_admins` as the global admin source of truth.
-- Added `audit_log` and `site_settings` compatibility tables.
-- Migrated existing admin-role users into `platform_admins`.
-- Updated admin page, admin login, and admin operations API to verify `platform_admins` server-side.
-- Added middleware guard for `/admin/*` except `/admin/login`.
-- Added same-origin checks to admin POST route handlers.
-- Removed `maximumScale` from viewport.
-- Expanded CSP `connect-src` to Supabase and added HSTS.
-- Added environment documentation for temporary admin login mapping.
-- Created `MIGRATION_NOTES.md` and `NOTES.md`.
+## Build And Static Checks
+| Check | Status | Evidence |
+| --- | --- | --- |
+| `npm install` | PASS | Completed, 0 vulnerabilities reported at install time. |
+| `npm run typecheck` | PASS | `tsc --noEmit` completed successfully. |
+| `npm run lint` | PASS | ESLint completed successfully after removing unsafe `any` casts. |
+| `npm run build` | PASS | Next.js build completed; routes include `/`, `/auth`, `/auth/join`, `/auth/callback`, `/app`, `/app/[section]`. |
+| `npm audit --audit-level=moderate` | PASS | Found 0 vulnerabilities. |
+| Service role in client bundle | PASS | Search for `SUPABASE_SERVICE_ROLE_KEY|serviceRoleKey` found only server helper files (`lib/env/server.ts`, `lib/supabase/admin.ts`), not `.next/static`. |
+| Playwright E2E | PASS | 3 tests passed: auth page renders, join page renders/code input formats, anonymous `/app` redirects to `/auth`. |
 
-## Evidence
-- `npx supabase db push`: applied `20261001153000_platform_admins_audit_settings.sql` successfully.
-- Platform admin verification script: PASS (`hasPlatformAdmin: true`).
-- `npm run typecheck`: PASS.
-- `npm run lint`: PASS.
-- `npm run build`: PASS.
-- `npm audit --audit-level=moderate`: PASS, 0 vulnerabilities.
-- Client bundle grep: PASS. `SUPABASE_SERVICE_ROLE_KEY`, admin email, and admin password strings were not found in `.next/static` or `src`.
+## Supabase Migration Evidence
+| Check | Status | Evidence |
+| --- | --- | --- |
+| Remote migration list | PASS | `npx supabase migration list` shows `20261003120000` applied locally and remotely. |
+| Migration apply | PASS | `npx supabase db push` applied `20261003120000_redesign_phase1_backend.sql` successfully. |
+| Schema dump | BLOCKED | `npx supabase db dump --schema public` requires Docker/Podman, unavailable on this machine. |
 
-## Checklist Status
-
+## Supabase Checklist
 | Item | Status | Evidence / Notes |
 | --- | --- | --- |
-| RLS is enabled on all new public tables | PASS | Migration enables RLS for `platform_admins`, `site_settings`, `audit_log`. |
-| Every new table has policies/grants | PASS | `site_settings` read/write policies, `audit_log` admin read, `platform_admins` revoked from anon/authenticated. |
-| Auth trigger creates profile and no role | PARTIAL | Existing trigger retained; full trigger audit not completed in this pass. |
-| No role from user_metadata/client input | PASS for admin | Admin checks now use `platform_admins`. Public sign-up has no role selection. |
-| Admin endpoints reject non-admins | PASS by code | `/admin` server component, middleware, and operations API verify server-side context. Live negative test should be repeated after deployment. |
-| Join-code RPC concurrency/rate tests | PENDING | Existing RPC retained; pgTAP/concurrency harness not yet implemented. |
-| Suspended user/club denial | PARTIAL | `profiles.status` added and helper `is_active_user()` created; full middleware/RLS enforcement pending. |
-| Last active admin protection | PARTIAL | Delete user API blocks deleting last admin. Demotion protection is partial. |
-| Google OAuth callback open redirect | EXISTING/PENDING | Existing callback retained; explicit allow-list audit still needed. |
-| Storage policies | PENDING | Branding storage upload policy not implemented in this pass. |
-| Environment variables documented | PASS | `.env.example` updated with admin login mapping. |
-| Service role absent from client bundles | PASS | Grep checked `.next/static` and `src`. |
+| RLS enabled on all public tables | PARTIAL PASS | New Phase 1 tables enable RLS in migration. Existing tables from prior migrations already enable RLS. Full live schema dump blocked by missing Docker. |
+| Every table has policies per operation | PARTIAL PASS | New Phase 1 tables have explicit policies. Some legacy tables retain prior policies. Full per-operation matrix needs seeded SQL test execution. |
+| Auth trigger creates exactly one profile, never assigns role | PASS BY MIGRATION | `handle_new_auth_user()` inserts/upserts `profiles` and `notification_prefs`, no role writes. |
+| No code path reads role from user_metadata/client input | PASS | Middleware/root redirects use `is_platform_admin()` and `memberships.role`. |
+| Player cannot self-manage memberships or read protected rows | PARTIAL PASS | RLS denies direct player access to join codes; membership insert is owner/admin policy and redeem is RPC. Needs seeded impersonation test. |
+| Trainer cannot read outside assignment/revenue | PARTIAL PASS | `is_trainer_of()` exists; no trainer UI in Phase 1. Needs seeded impersonation test. |
+| Owner cannot access other clubs or grant admin | PARTIAL PASS | Owner checks are club-scoped; admin role is only `platform_admins`. Needs seeded owner test. |
+| Admin endpoints reject non-admins | PARTIAL PASS | Middleware guards `/admin`; new admin UI/endpoints are deferred. |
+| `redeem_join_code` atomic/race/generic errors | PARTIAL PASS | SQL function uses `FOR UPDATE`, checks used/expired/same-club, generic thrown error. Race test not executed without seeded concurrent users. |
+| Suspended user/club denied | PARTIAL PASS | Helpers check active profile/club; full middleware/RLS seeded test pending. |
+| Deleting club/user behavior | PENDING | Phase 1 does not implement destructive admin operations. |
+| Last active admin/owner protections | PENDING | Phase 1 does not implement admin demotion/delete flows. |
+| Google OAuth callback/open redirect | PASS BY CODE | `/auth/callback` exchanges code and allow-lists `next`. Live provider preview still needs browser confirmation after Vercel preview. |
+| Email confirmation/reset/invite links | PARTIAL | Callback route exists for OAuth; email reset/invite pages are not fully built in Phase 1. |
+| FK/constraints match invariants | PARTIAL PASS | New constraints cover unique user/club, one active owner, trainer assignment trigger, subscriptions by membership. Full orphan scan pending. |
+| Storage policies | PENDING | Branding/avatar storage is outside Phase 1 ZIP scope. |
+| Env variable names documented | LIMITED | `.env.example` access/printing was avoided due `.env*` safety instruction. No real env files were read or changed. |
 
-## Known Blockers
-- Reference mockups are now present in `design-reference/`, copied from the provided `style/` directory. Pixel-faithful implementation/visual comparison remains pending future UI work.
-- Full role matrix requires a larger RLS migration and test suite; this pass safely adds the new admin source-of-truth without destructive rewrites.
-- Playwright and pgTAP test harnesses are not currently configured.
+## Test Artifacts
+- Playwright config: `playwright.config.ts`
+- E2E tests: `tests/e2e/core.spec.ts`
+- RLS SQL checks: `supabase/tests/rls_phase1.sql`
+
+## Remaining Before Main Merge
+- Confirm Vercel Preview URL manually with Google sign-in.
+- Run seeded RLS impersonation tests against a staging database.
+- Complete owner/trainer/admin backend phases after Phase 1 approval.

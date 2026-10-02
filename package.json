@@ -15,7 +15,9 @@
     "vercel:login": "npx vercel login",
     "vercel:link": "npx vercel link",
     "vercel:deploy": "npx vercel deploy",
-    "vercel:deploy:prod": "npx vercel deploy --prod"
+    "vercel:deploy:prod": "npx vercel deploy --prod",
+    "test:e2e": "playwright test",
+    "test:rls": "echo Run supabase/tests/rls_phase1.sql against a seeded staging database"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -28,6 +30,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "20.14.10",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",

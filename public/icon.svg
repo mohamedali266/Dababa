@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Dababa">
-  <rect width="512" height="512" rx="128" fill="#050A18"/>
-  <circle cx="352" cy="164" r="118" fill="#2F6BFF" opacity=".32"/>
-  <path d="M132 362V138h92c72 0 124 45 124 112s-52 112-124 112h-92Zm72-64h22c30 0 50-19 50-48s-20-48-50-48h-22v96Z" fill="#FFFFFF"/>
-  <path d="M112 384h288" stroke="#3D8BFF" stroke-width="24" stroke-linecap="round"/>
-</svg>
