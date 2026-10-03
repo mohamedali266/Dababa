@@ -46,9 +46,11 @@ export async function signUpWithEmail(name: string, email: string, password: str
   return ok(undefined);
 }
 
-export async function signInWithGoogle(next = "/app"): Promise<Result> {
+export async function signInWithGoogle(next = "/app", flow?: "onboarding"): Promise<Result> {
   const supabase = createSupabaseBrowserClient();
-  const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
+  const params = new URLSearchParams({ next });
+  if (flow) params.set("flow", flow);
+  const redirectTo = `${window.location.origin}/auth/callback?${params.toString()}`;
   const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo } });
   if (error) return { ok: false, error: "تعذر بدء الدخول باستخدام Google." };
   return ok(undefined);
@@ -216,3 +218,6 @@ function estimateCalories(weight: number) {
   const safeWeight = Number.isFinite(weight) && weight > 0 ? weight : 80;
   return Math.round(Math.max(1600, safeWeight * 30));
 }
+
+
+

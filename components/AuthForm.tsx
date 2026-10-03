@@ -55,17 +55,20 @@ export default function AuthForm() {
   const progress = journeyModes.includes(mode) ? Math.round(((activeIndex + 1) / journeyModes.length) * 100) : mode === "success" ? 100 : 0;
 
   useEffect(() => {
+    const cookieFlow = document.cookie.split("; ").some((cookie) => cookie === "dababa_oauth_flow=onboarding");
+    const queryFlow = search.get("flow") === "onboarding";
     const pending = window.localStorage.getItem("dababa:onboarding");
-    if (pending === "google") {
+    if (pending === "google" || queryFlow || cookieFlow) {
       getCurrentUserEmail().then((email) => {
         if (!email) return;
         window.localStorage.removeItem("dababa:onboarding");
+        document.cookie = "dababa_oauth_flow=; Max-Age=0; path=/";
         setProvider("google");
         setForm((current) => ({ ...current, email, username: current.username || email.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "").slice(0, 24) }));
         setMode("identity");
       });
     }
-  }, []);
+  }, [search]);
 
   useEffect(() => {
     if (mode !== "loading") return;
@@ -123,7 +126,7 @@ export default function AuthForm() {
   async function googleSignup() {
     setBusy(true); setErr("");
     window.localStorage.setItem("dababa:onboarding", "google");
-    const r = await signInWithGoogle("/auth");
+    const r = await signInWithGoogle("/auth", "onboarding");
     setBusy(false);
     if (!r.ok) {
       window.localStorage.removeItem("dababa:onboarding");
@@ -360,4 +363,7 @@ function formatCode(value: string) {
   if (c.length > 3) c = `${c.slice(0, 3)}-${c.slice(3)}`;
   return c;
 }
+
+
+
 
