@@ -1,10 +1,14 @@
 import { expect, test } from "@playwright/test";
 
-test("auth page renders Arabic glass signup flow", async ({ page }) => {
+test("auth page renders the new staged signup journey", async ({ page }) => {
   await page.goto("/auth");
-  await expect(page.getByRole("heading", { name: /أهلًا بعودتك|ابدأ رحلتك/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: /المتابعة بحساب جوجل/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: /عندك كود من ناديك/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "جاهز نبني حسابك الرياضي؟" })).toBeVisible();
+  await page.getByRole("button", { name: "ابدأ الآن" }).click();
+  await expect(page.getByRole("heading", { name: "طريقة إنشاء الحساب" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /التسجيل باستخدام Google/ })).toBeVisible();
+  await page.getByRole("button", { name: "التسجيل بالبريد وكلمة مرور" }).click();
+  await expect(page.getByRole("heading", { name: "بياناتك الأساسية" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /معك كود نادي فقط/ })).toBeVisible();
 });
 
 test("join page previews code input and keeps generic invalid errors", async ({ page }) => {

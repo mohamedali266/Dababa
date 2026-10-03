@@ -2,6 +2,22 @@
 export type Role = "admin" | "owner" | "trainer" | "player";
 export type Result<T = undefined> = { ok: true; data: T } | { ok: false; error: string };
 export type JoinPreview = { clubName: string; trainerName: string | null; planDays: number };
+export type OnboardingInput = {
+  name: string;
+  email?: string;
+  username: string;
+  gender: "male" | "female" | "prefer_not_to_say";
+  birthDate: string;
+  heightCm: number;
+  weightKg: number;
+  activityLevel: "low" | "moderate" | "high";
+  trainingDaysPerWeek: number;
+  workoutDurationMinutes: number;
+  trainingExperience: "beginner" | "intermediate" | "advanced";
+  goal: "lose_weight" | "build_muscle" | "recomposition" | "fitness";
+  goalDurationWeeks: number;
+  joinCode?: string;
+};
 export type HomeData = {
   name: string;
   rings: [number, number, number]; // workout, water, calories: 0..1

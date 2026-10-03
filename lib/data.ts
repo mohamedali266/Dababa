@@ -1,5 +1,5 @@
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import type { HomeData, JoinPreview, Result } from "@/types/db";
+import type { HomeData, JoinPreview, OnboardingInput, Result } from "@/types/db";
 
 type AssessmentAnswers = { body?: { weight_kg?: number | string | null }; training?: { training_days_per_week?: number | string | null; workout_duration_minutes?: number | string | null } };
 type SupplementRow = { name: string; supplement_logs?: { id: string }[] | null };
@@ -40,17 +40,82 @@ export async function signUpWithEmail(name: string, email: string, password: str
 
   if (!result.data.session) {
     const signIn = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
-    if (signIn.error) return { ok: false, error: "تم إنشاء الحساب. راجع بريدك لتأكيد الحساب ثم سجل الدخول." };
+    if (signIn.error) return { ok: false, error: "تم إنشاء الحساب، لكن إعداد تأكيد البريد مفعل في Supabase. افتح البريد أو عطّل Email confirmations مؤقتًا من Authentication." };
   }
 
   return ok(undefined);
 }
 
-export async function signInWithGoogle(): Promise<Result> {
+export async function signInWithGoogle(next = "/app"): Promise<Result> {
   const supabase = createSupabaseBrowserClient();
-  const redirectTo = `${window.location.origin}/auth/callback?next=/app`;
+  const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
   const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo } });
   if (error) return { ok: false, error: "تعذر بدء الدخول باستخدام Google." };
+  return ok(undefined);
+}
+
+export async function getCurrentUserEmail(): Promise<string | null> {
+  const supabase = createSupabaseBrowserClient();
+  const { data } = await supabase.auth.getUser();
+  return data.user?.email ?? null;
+}
+
+export async function completeOnboarding(input: OnboardingInput): Promise<Result> {
+  const supabase = createSupabaseBrowserClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  const user = userData.user;
+  if (userError || !user) return { ok: false, error: "سجل الدخول أولًا لإكمال رحلة التسجيل." };
+
+  const birthYear = input.birthDate ? new Date(input.birthDate).getFullYear() : null;
+  const profileUpdate = {
+    display_name: input.name.trim(),
+    full_name: input.name.trim(),
+    username: input.username.trim().toLowerCase(),
+    gender: input.gender,
+    birth_date: input.birthDate || null,
+    birth_year: Number.isFinite(birthYear) ? birthYear : null,
+    height_cm: input.heightCm,
+    weight_kg: input.weightKg,
+    status: "active"
+  };
+
+  const { error: profileError } = await supabase.from("profiles").update(profileUpdate).eq("id", user.id);
+  if (profileError) return { ok: false, error: "تعذر حفظ بياناتك الأساسية. جرّب اسم مستخدم مختلف." };
+
+  const answers = {
+    identity: {
+      name: input.name.trim(),
+      email: input.email?.trim().toLowerCase() || user.email || null,
+      username: input.username.trim().toLowerCase(),
+      gender: input.gender,
+      birth_date: input.birthDate
+    },
+    body: { height_cm: input.heightCm, weight_kg: input.weightKg },
+    training: {
+      activity_level: input.activityLevel,
+      training_days_per_week: input.trainingDaysPerWeek,
+      workout_duration_minutes: input.workoutDurationMinutes,
+      experience: input.trainingExperience
+    },
+    goal: { type: input.goal, duration_weeks: input.goalDurationWeeks },
+    club: { join_code_entered: Boolean(input.joinCode?.trim()) }
+  };
+
+  const { error: assessmentError } = await supabase.from("assessments").upsert({
+    user_id: user.id,
+    goal: input.goal,
+    level: input.trainingExperience,
+    training_days: Array.from({ length: input.trainingDaysPerWeek }, (_, index) => `day_${index + 1}`),
+    answers,
+    completed_at: new Date().toISOString()
+  }, { onConflict: "user_id" });
+  if (assessmentError) return { ok: false, error: "تعذر حفظ التقييم. حاول مرة أخرى." };
+
+  if (input.joinCode?.trim()) {
+    const joined = await redeemJoinCode(input.joinCode);
+    if (!joined.ok) return joined;
+  }
+
   return ok(undefined);
 }
 
