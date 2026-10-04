@@ -51,3 +51,30 @@ Branch: redesign
 - Confirm Vercel Preview URL manually with Google sign-in.
 - Run seeded RLS impersonation tests against a staging database.
 - Complete owner/trainer/admin backend phases after Phase 1 approval.
+## 2026-10-04 Update
+
+Implemented in this pass:
+- Rebuilt `/auth` onboarding to follow `design-reference/dababa-assessment.html` more closely.
+- Removed preselected/default onboarding answers for gender, body metrics, goal, level, activity, training days, and duration.
+- Added option cards, steppers, training-day chips, optional injuries, final summary, progress persistence/resume, and sticky progress/action controls.
+- Removed username from the product flow.
+- Google onboarding now pre-fills email/name from the authenticated user when available.
+- Added iOS Safari input and background fixes, safe-area bottom padding, and sticky progress below the status bar.
+- Added rule-based nutrition and workout plan insertion after assessment completion.
+- Fixed home greeting to use first name in `<bdi>` and removed supplement placeholder output for empty data.
+- Added `/app/account` with profile, clubs and server-action logout.
+- Added basic `/admin/login`, `/admin`, `/admin/clubs`, `/admin/users`, `/admin/billing`, `/admin/settings` pages and stricter middleware behavior for `/admin/*`.
+- Added `scripts/seed-admin.ts` without credentials and with `ADMIN_SEED_CONFIRM=yes` refusal guard.
+
+Verification run:
+- `npm run typecheck`: PASS
+- `npm run lint`: PASS
+- `npm run build`: PASS
+- `npm run test:e2e`: PASS, 4 tests
+- 390px screenshots generated locally under `test-results/screenshots/` and intentionally not committed.
+
+Known gaps / not production-complete:
+- Full admin mutation backend is not complete yet. Create/edit/suspend/delete, billing invoice creation, receipt upload, logo magic-byte validation, lockout persistence, audit writes for every mutation, and MFA enforcement hooks still need real route handlers/server actions.
+- No destructive production admin cleanup was run. See `ADMIN_SETUP_REPORT.md`.
+- Admin login is functional but full rate-limit/lockout persistence is not implemented yet.
+- `ADMIN_MFA_REQUIRED` is documented as required before launch but not fully enforced yet.

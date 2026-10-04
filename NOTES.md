@@ -23,3 +23,9 @@ Branch: redesign
 - Google sign-in Preview confirmation requires opening the Vercel Preview URL after push and using the configured Google provider in a browser.
 - `.env.example` was not printed or inspected because `.env*` access was treated as prohibited by the safety instruction. No real `.env` values were read or changed.
 - The Next.js 16 build warns that `middleware.ts` is deprecated in favor of `proxy.ts`; this is a warning, not a build failure.
+## 2026-10-04 Notes
+
+- Do not enable production launch until admin MFA is enforced. `ADMIN_MFA_REQUIRED` must default false during development but be set true before launch, with Supabase AAL2/TOTP enrollment enforced for `/admin/*`.
+- The current admin panel has read views and guarded routing; high-risk mutations intentionally remain pending rather than implemented partially without complete validation, audit logging, and rollback behavior.
+- Admin cleanup/revocation was not executed because it requires a verified backup and manual review of accounts that may contain personal/player data.
+- The onboarding flow persists draft progress in localStorage, excluding password fields.

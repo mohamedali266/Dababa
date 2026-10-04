@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-const NAMES: Record<string, string> = { workout: "التمرين", nutrition: "التغذية", progress: "التقدم", account: "حسابي" };
+const NAMES: Record<string, string> = { workout: "التمرين", nutrition: "التغذية", progress: "التقدم" };
 export function generateStaticParams() { return Object.keys(NAMES).map((section) => ({ section })); }
 
 export default async function Section({ params }: { params: Promise<{ section: string }> }) {

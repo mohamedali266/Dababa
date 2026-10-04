@@ -17,6 +17,7 @@ export async function middleware(request: NextRequest) {
   if (pathname === "/admin/login") return NextResponse.next();
 
   let response = NextResponse.next({ request });
+  response.headers.set("Cache-Control", "no-store");
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -26,6 +27,7 @@ export async function middleware(request: NextRequest) {
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           response = NextResponse.next({ request });
+          response.headers.set("Cache-Control", "no-store");
           cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
         }
       }
@@ -33,17 +35,17 @@ export async function middleware(request: NextRequest) {
   );
 
   const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) return redirectToAuth(request, area);
+  if (error || !user) return area === "admin" ? redirectAdminLogin(request) : redirectToAuth(request);
 
   const { data: active } = await supabase.rpc("is_active_user");
-  if (!active) return redirectToAuth(request, area);
+  if (!active) return area === "admin" ? notFound() : redirectToAuth(request);
 
   if (area === "app") return response;
 
   const { data: isAdmin } = await supabase.rpc("is_platform_admin");
   if (isAdmin) return response;
 
-  if (area === "admin") return redirectToAuth(request, area);
+  if (area === "admin") return notFound();
 
   const neededRole = area === "club" ? "owner" : "trainer";
   const { data: memberships } = await supabase
@@ -55,7 +57,7 @@ export async function middleware(request: NextRequest) {
     .limit(1);
 
   if (memberships && memberships.length > 0) return response;
-  return redirectToAuth(request, area);
+  return redirectToAuth(request);
 }
 
 function resolveArea(pathname: string): Area | null {
@@ -63,12 +65,22 @@ function resolveArea(pathname: string): Area | null {
   return found?.[1] ?? null;
 }
 
-function redirectToAuth(request: NextRequest, area: Area) {
+function redirectToAuth(request: NextRequest) {
   const url = request.nextUrl.clone();
-  url.pathname = area === "admin" ? "/auth" : "/auth";
+  url.pathname = "/auth";
   url.searchParams.set("next", request.nextUrl.pathname);
-  if (area === "admin") url.searchParams.set("security", "admin_required");
   return NextResponse.redirect(url);
+}
+
+function redirectAdminLogin(request: NextRequest) {
+  const url = request.nextUrl.clone();
+  url.pathname = "/admin/login";
+  url.searchParams.set("next", request.nextUrl.pathname);
+  return NextResponse.redirect(url);
+}
+
+function notFound() {
+  return new NextResponse(null, { status: 404, headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex" } });
 }
 
 export const config = {

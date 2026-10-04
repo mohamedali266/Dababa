@@ -1,7 +1,11 @@
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { HomeData, JoinPreview, OnboardingInput, Result } from "@/types/db";
 
-type AssessmentAnswers = { body?: { weight_kg?: number | string | null }; training?: { training_days_per_week?: number | string | null; workout_duration_minutes?: number | string | null } };
+type AssessmentAnswers = {
+  body?: { weight_kg?: number | string | null; height_cm?: number | string | null; age?: number | string | null };
+  training?: { training_days?: string[] | null; training_days_per_week?: number | string | null; workout_duration_minutes?: number | string | null; experience?: string | null; activity_level?: string | null };
+  goal?: { type?: string | null; duration_weeks?: number | string | null };
+};
 type SupplementRow = { name: string; supplement_logs?: { id: string }[] | null };
 type MembershipRow = { trainer?: { profiles?: { display_name?: string | null } | null } | null };
 
@@ -56,10 +60,19 @@ export async function signInWithGoogle(next = "/app", flow?: "onboarding"): Prom
   return ok(undefined);
 }
 
-export async function getCurrentUserEmail(): Promise<string | null> {
+export async function getCurrentUserIdentity(): Promise<{ email: string | null; name: string | null }> {
   const supabase = createSupabaseBrowserClient();
   const { data } = await supabase.auth.getUser();
-  return data.user?.email ?? null;
+  const user = data.user;
+  return {
+    email: user?.email ?? null,
+    name: typeof user?.user_metadata?.full_name === "string" ? user.user_metadata.full_name : typeof user?.user_metadata?.name === "string" ? user.user_metadata.name : null
+  };
+}
+
+export async function getCurrentUserEmail(): Promise<string | null> {
+  const identity = await getCurrentUserIdentity();
+  return identity.email;
 }
 
 export async function completeOnboarding(input: OnboardingInput): Promise<Result> {
@@ -68,50 +81,53 @@ export async function completeOnboarding(input: OnboardingInput): Promise<Result
   const user = userData.user;
   if (userError || !user) return { ok: false, error: "سجل الدخول أولًا لإكمال رحلة التسجيل." };
 
-  const birthYear = input.birthDate ? new Date(input.birthDate).getFullYear() : null;
+  const birthYear = new Date().getFullYear() - input.age;
   const profileUpdate = {
     display_name: input.name.trim(),
     full_name: input.name.trim(),
-    username: input.username.trim().toLowerCase(),
     gender: input.gender,
-    birth_date: input.birthDate || null,
-    birth_year: Number.isFinite(birthYear) ? birthYear : null,
+    birth_year: birthYear,
+    birth_date: null,
     height_cm: input.heightCm,
     weight_kg: input.weightKg,
     status: "active"
   };
 
   const { error: profileError } = await supabase.from("profiles").update(profileUpdate).eq("id", user.id);
-  if (profileError) return { ok: false, error: "تعذر حفظ بياناتك الأساسية. جرّب اسم مستخدم مختلف." };
+  if (profileError) return { ok: false, error: "تعذر حفظ بياناتك الأساسية. حاول مرة أخرى." };
 
   const answers = {
     identity: {
       name: input.name.trim(),
       email: input.email?.trim().toLowerCase() || user.email || null,
-      username: input.username.trim().toLowerCase(),
       gender: input.gender,
-      birth_date: input.birthDate
+      age: input.age
     },
-    body: { height_cm: input.heightCm, weight_kg: input.weightKg },
+    body: { age: input.age, height_cm: input.heightCm, weight_kg: input.weightKg },
     training: {
       activity_level: input.activityLevel,
-      training_days_per_week: input.trainingDaysPerWeek,
+      training_days: input.trainingDays,
+      training_days_per_week: input.trainingDays.length,
       workout_duration_minutes: input.workoutDurationMinutes,
-      experience: input.trainingExperience
+      experience: input.trainingExperience,
+      injuries: input.injuries
     },
     goal: { type: input.goal, duration_weeks: input.goalDurationWeeks },
     club: { join_code_entered: Boolean(input.joinCode?.trim()) }
   };
 
-  const { error: assessmentError } = await supabase.from("assessments").upsert({
+  const { data: assessment, error: assessmentError } = await supabase.from("assessments").upsert({
     user_id: user.id,
     goal: input.goal,
     level: input.trainingExperience,
-    training_days: Array.from({ length: input.trainingDaysPerWeek }, (_, index) => `day_${index + 1}`),
+    training_days: input.trainingDays,
+    injuries: input.injuries,
     answers,
     completed_at: new Date().toISOString()
-  }, { onConflict: "user_id" });
+  }, { onConflict: "user_id" }).select("id").maybeSingle();
   if (assessmentError) return { ok: false, error: "تعذر حفظ التقييم. حاول مرة أخرى." };
+
+  await ensureSuggestedPlans(supabase, user.id, input, assessment?.id ?? null);
 
   if (input.joinCode?.trim()) {
     const joined = await redeemJoinCode(input.joinCode);
@@ -150,17 +166,19 @@ export async function getHome(): Promise<HomeData> {
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  const [profile, assessment, memberships, water, nutrition, workouts, supplements] = await Promise.all([
+  const [profile, assessment, memberships, water, nutrition, workouts, supplements, plans] = await Promise.all([
     supabase.from("profiles").select("display_name, full_name, weight_kg").eq("id", user.id).maybeSingle(),
     supabase.from("assessments").select("answers, goal, level, training_days, place, completed_at").eq("user_id", user.id).maybeSingle(),
     supabase.from("memberships").select("id, role, status, clubs(name), trainer:trainer_membership_id(user_id, profiles(display_name))").eq("user_id", user.id).eq("role", "player").eq("status", "active"),
     supabase.from("water_logs").select("amount_ml").eq("user_id", user.id).gte("logged_at", today.toISOString()).lt("logged_at", tomorrow.toISOString()),
     supabase.from("nutrition_plans").select("calories, protein_g, carbs_g, fat_g").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
     supabase.from("workout_logs").select("id, title, completed_at").eq("user_id", user.id).gte("workout_date", today.toISOString().slice(0, 10)).limit(20),
-    supabase.from("supplement_plans").select("id, name, supplement_logs(id)").eq("user_id", user.id).limit(20)
+    supabase.from("supplement_plans").select("id, name, supplement_logs(id)").eq("user_id", user.id).limit(20),
+    supabase.from("training_plans").select("id, title, plan").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle()
   ]);
 
   const displayName = profile.data?.display_name ?? profile.data?.full_name ?? user.email?.split("@")[0] ?? "لاعب";
+  const firstName = displayName.trim().split(/\s+/)[0] || displayName;
   const answers = (assessment.data?.answers ?? {}) as AssessmentAnswers;
   const weight = Number(profile.data?.weight_kg ?? answers.body?.weight_kg ?? 80);
   const waterGoal = Math.max(1800, Math.round((Number.isFinite(weight) ? weight : 80) * 35));
@@ -169,16 +187,21 @@ export async function getHome(): Promise<HomeData> {
   const sessionsDone = (workouts.data ?? []).filter((row) => row.completed_at).length;
   const caloriesGoal = Number(nutrition.data?.calories ?? estimateCalories(weight));
   const caloriesEaten = 0;
-  const supplementItems = ((supplements.data ?? []) as SupplementRow[]).map((item) => ({ name: item.name, done: Array.isArray(item.supplement_logs) && item.supplement_logs.length > 0 }));
+  const supplementItems = ((supplements.data ?? []) as SupplementRow[]).filter((item) => item.name).map((item) => ({ name: item.name, done: Array.isArray(item.supplement_logs) && item.supplement_logs.length > 0 }));
   const activeMembership = memberships.data?.[0] as MembershipRow | undefined;
   const trainerName = activeMembership?.trainer?.profiles?.display_name ?? null;
+  const suggestedPlan = plans.data?.plan as { workouts?: { title?: string; minutes?: number; exercises?: string[]; kcal?: number }[] } | null;
+  const suggestedWorkout = suggestedPlan?.workouts?.[0];
 
   return {
-    name: displayName,
+    name: firstName,
     rings: [Math.min(1, sessionsDone / sessionsGoal), Math.min(1, waterMl / waterGoal), Math.min(1, caloriesEaten / caloriesGoal)],
     workout: workouts.data?.[0]
       ? { title: workouts.data[0].title, trainer: trainerName, exercises: 0, minutes: Number(answers.training?.workout_duration_minutes ?? 0), kcal: 0 }
-      : null,
+      : suggestedWorkout
+        ? { title: suggestedWorkout.title ?? "تمرين مقترح", trainer: trainerName, exercises: suggestedWorkout.exercises?.length ?? 0, minutes: Number(suggestedWorkout.minutes ?? answers.training?.workout_duration_minutes ?? 45), kcal: Number(suggestedWorkout.kcal ?? 0) }
+        : null,
+    planPending: Boolean(assessment.data?.completed_at && !plans.data),
     water: { ml: waterMl, goal: waterGoal },
     meal: nutrition.data ? { label: "الوجبة القادمة", kcal: Math.round(caloriesGoal / 3), protein: nutrition.data.protein_g, carbs: nutrition.data.carbs_g, fat: nutrition.data.fat_g } : null,
     supplements: { taken: supplementItems.filter((item) => item.done).length, total: supplementItems.length, items: supplementItems },
@@ -206,6 +229,7 @@ function emptyHome(name: string): HomeData {
     name,
     rings: [0, 0, 0],
     workout: null,
+    planPending: false,
     water: { ml: 0, goal: 2800 },
     meal: null,
     supplements: { taken: 0, total: 0, items: [] },
@@ -219,5 +243,55 @@ function estimateCalories(weight: number) {
   return Math.round(Math.max(1600, safeWeight * 30));
 }
 
+async function ensureSuggestedPlans(supabase: ReturnType<typeof createSupabaseBrowserClient>, userId: string, input: OnboardingInput, assessmentId: string | null) {
+  const calories = calculateCalories(input);
+  const protein = Math.round(input.weightKg * (input.goal === "build_muscle" || input.goal === "strength" ? 2 : 1.7));
+  const fat = Math.round(Math.max(45, input.weightKg * 0.8));
+  const carbs = Math.round(Math.max(90, (calories - protein * 4 - fat * 9) / 4));
 
+  await supabase.from("nutrition_plans").insert({
+    user_id: userId,
+    calories,
+    protein_g: protein,
+    carbs_g: carbs,
+    fat_g: fat,
+    formula: "dababa_rule_v1",
+    prompt_version: "rule-v1",
+    source_inputs: { assessment_id: assessmentId, goal: input.goal, age: input.age, weight_kg: input.weightKg, height_cm: input.heightCm, activity_level: input.activityLevel }
+  });
 
+  await supabase.from("training_plans").insert({
+    user_id: userId,
+    title: "خطة مقترحة كبداية",
+    goal: input.goal,
+    prompt_version: "rule-v1",
+    source_inputs: { assessment_id: assessmentId, days: input.trainingDays, injuries: input.injuries, level: input.trainingExperience },
+    plan: buildWorkoutPlan(input),
+    starts_on: new Date().toISOString().slice(0, 10)
+  });
+}
+
+function calculateCalories(input: OnboardingInput) {
+  const genderFactor = input.gender === "female" ? -161 : 5;
+  const bmr = 10 * input.weightKg + 6.25 * input.heightCm - 5 * input.age + genderFactor;
+  const activity = input.activityLevel === "high" ? 1.55 : input.activityLevel === "moderate" ? 1.38 : 1.22;
+  const goalDelta = input.goal === "lose_weight" ? -350 : input.goal === "build_muscle" || input.goal === "strength" ? 250 : 0;
+  return Math.round(Math.min(6000, Math.max(1200, bmr * activity + goalDelta)));
+}
+
+function buildWorkoutPlan(input: OnboardingInput) {
+  const split = input.trainingDays.length >= 4 ? ["Push", "Pull", "Legs", "Full body"] : ["Full body A", "Full body B", "Mobility"];
+  const avoid = new Set(input.injuries);
+  const exercises = ["Squat pattern", "Hip hinge", "Horizontal push", "Horizontal pull", "Core stability"].filter((item) => !(avoid.has("الركبة") && item === "Squat pattern"));
+  return {
+    status: "suggested",
+    generated_by: "rule-v1",
+    workouts: input.trainingDays.map((day, index) => ({
+      day,
+      title: split[index % split.length],
+      minutes: input.workoutDurationMinutes,
+      kcal: Math.round(input.workoutDurationMinutes * 6),
+      exercises
+    }))
+  };
+}

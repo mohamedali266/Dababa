@@ -5,23 +5,24 @@ export type JoinPreview = { clubName: string; trainerName: string | null; planDa
 export type OnboardingInput = {
   name: string;
   email?: string;
-  username: string;
   gender: "male" | "female" | "prefer_not_to_say";
-  birthDate: string;
+  age: number;
   heightCm: number;
   weightKg: number;
   activityLevel: "low" | "moderate" | "high";
-  trainingDaysPerWeek: number;
+  trainingDays: string[];
   workoutDurationMinutes: number;
   trainingExperience: "beginner" | "intermediate" | "advanced";
-  goal: "lose_weight" | "build_muscle" | "recomposition" | "fitness";
+  goal: "lose_weight" | "build_muscle" | "recomposition" | "fitness" | "strength";
   goalDurationWeeks: number;
+  injuries: string[];
   joinCode?: string;
 };
 export type HomeData = {
   name: string;
   rings: [number, number, number]; // workout, water, calories: 0..1
   workout: { title: string; trainer: string | null; exercises: number; minutes: number; kcal: number } | null;
+  planPending: boolean;
   water: { ml: number; goal: number };
   meal: { label: string; kcal: number; protein: number; carbs: number; fat: number } | null;
   supplements: { taken: number; total: number; items: { name: string; done: boolean }[] };

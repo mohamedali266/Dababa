@@ -20,8 +20,8 @@ export default function PlayerHome() {
 
   return (
     <>
-      <h1>صباح الخير يا {d.name}</h1>
-      <p className="sub" style={{ marginBottom: 0 }}>{d.workout ? "يومك جاهز، ابدأ بالتمرين." : "لسه مفيش خطة لليوم."}</p>
+      <h1>صباح الخير يا <bdi>{d.name}</bdi></h1>
+      <p className="sub" style={{ marginBottom: 0 }}>{d.workout ? "يومك جاهز، ابدأ بالتمرين." : d.planPending ? "جاري تجهيز خطتك." : "لسه مفيش خطة لليوم."}</p>
 
       <section className="top glass" aria-label="تقدم اليوم">
         <div className="ringwrap"><Rings values={d.rings} /><div className="center"><b>{ar(pct)}%</b><span>إنجاز اليوم</span></div></div>
@@ -36,11 +36,13 @@ export default function PlayerHome() {
         <section className="hero">
           <small>تمرين اليوم{d.workout.trainer ? ` · من ${d.workout.trainer}` : ""}</small>
           <h2>{d.workout.title}</h2>
-          <div className="meta"><span>{ar(d.workout.exercises)} تمارين</span><span>{ar(d.workout.minutes)} دقيقة</span><span>{ar(d.workout.kcal)} سعرة</span></div>
+          <div className="meta"><span>{ar(d.workout.exercises)} تمارين</span><span>{ar(d.workout.minutes)} دقيقة</span>{d.workout.kcal > 0 && <span>{ar(d.workout.kcal)} سعرة</span>}</div>
           <button className="go">ابدأ التمرين</button>
         </section>
+      ) : d.planPending ? (
+        <section className="glass empty"><b>جاري تجهيز خطتك</b><span>بنرتب تمرينك وسعراتك بناءً على التقييم.</span></section>
       ) : (
-        <section className="glass empty"><b>مفيش تمرين النهارده</b><span>أنشئ خطتك من التقييم وهتظهر هنا.</span></section>
+        <section className="glass empty"><b>مفيش تمرين النهارده</b><span>ابدأ التقييم علشان نجهز خطتك.</span></section>
       )}
 
       <div className="sec"><h3>تابع يومك</h3></div>
@@ -59,11 +61,18 @@ export default function PlayerHome() {
             <small style={{ color: "var(--muted)", fontSize: 11 }}>بروتين {ar(d.meal.protein)}ج · كارب {ar(d.meal.carbs)}ج · دهون {ar(d.meal.fat)}ج</small>
           </div>
         )}
-        <div className="card glass">
-          <h4>المكملات</h4>
-          <div className="big">{ar(d.supplements.taken)} <small>من {ar(d.supplements.total)}</small></div>
-          <div className="chips">{d.supplements.items.map((s) => <span key={s.name}>{s.name}{s.done ? " ✓" : ""}</span>)}</div>
-        </div>
+        {d.supplements.total > 0 ? (
+          <div className="card glass">
+            <h4>المكملات</h4>
+            <div className="big">{ar(d.supplements.taken)} <small>من {ar(d.supplements.total)}</small></div>
+            <div className="chips">{d.supplements.items.map((s) => <span key={s.name}>{s.name}{s.done ? " ✓" : ""}</span>)}</div>
+          </div>
+        ) : (
+          <div className="card glass">
+            <h4>المكملات</h4>
+            <div className="empty mini"><b>مفيش مكملات</b><span>أضفها لاحقًا من خطتك.</span></div>
+          </div>
+        )}
       </div>
     </>
   );
