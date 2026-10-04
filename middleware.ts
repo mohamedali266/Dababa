@@ -80,9 +80,41 @@ function redirectAdminLogin(request: NextRequest) {
 }
 
 function notFound() {
-  return new NextResponse(null, { status: 404, headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex" } });
+  return new NextResponse(
+    `<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>غير مصرح بالدخول | Dababa</title>
+  <style>
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0f172a;color:#f8fafc;font-family:Arial,sans-serif}
+    main{width:min(92vw,520px);padding:32px;border:1px solid rgba(248,250,252,.14);background:rgba(15,23,42,.92);box-shadow:0 24px 80px rgba(0,0,0,.35)}
+    h1{margin:0 0 12px;font-size:26px}
+    p{margin:0 0 22px;color:#cbd5e1;line-height:1.8}
+    a{display:inline-flex;padding:12px 18px;background:#f8fafc;color:#0f172a;text-decoration:none;font-weight:700}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>غير مصرح بالدخول</h1>
+    <p>هذه المنطقة مخصصة لإدارة المنصة فقط. محاولة الدخول بحساب غير مصرح قد تعرض الحساب للحظر النهائي.</p>
+    <a href="/auth">الرجوع إلى الصفحة الرئيسية</a>
+  </main>
+</body>
+</html>`,
+    {
+      status: 404,
+      headers: {
+        "Cache-Control": "no-store",
+        "Content-Type": "text/html; charset=utf-8",
+        "X-Robots-Tag": "noindex"
+      }
+    }
+  );
 }
 
 export const config = {
   matcher: ["/app/:path*", "/club/:path*", "/trainer/:path*", "/admin/:path*"]
 };
+
